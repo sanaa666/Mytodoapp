@@ -22,9 +22,6 @@ function ToDo(){
     setTasks(tasks.map((task, i)=>
       i === index ? {...task, completed: !task.completed} : task
     ));
-
- 
-
   }
 
   function deleteTask(index){

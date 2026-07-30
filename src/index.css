@@ -45,7 +45,7 @@ button{
   color: blueviolet;
   font-weight: bold;
   cursor: pointer;
-  gap:calc(2px)
+  
 }
 
 .delete-button{
