@@ -34,7 +34,7 @@ function ToDo(){
     
           <div className="task">
             <h1>To Do</h1>
-            <h3>Items still not completed: {incompleteCount}</h3>
+            <h3>Items still not complete: {incompleteCount}</h3>
             <div>
               <input
                       type="text"
@@ -49,27 +49,32 @@ function ToDo(){
                     </button>
             </div>
 
+          <div className="tasks-container">
             <ol>
-              {tasks.map((task, index)=>
-                <li key={index}>
-                  <span className={`text ${task.completed ?  "completed" : ""}`}>
-                    {task.text}
-                  </span>
-                  <button
-                    className="complete-button"
-                    onClick= {() => completeTask(index)}>
-                    ✅
-                  </button>
-                  <button
-                    className="delete-button"
-                    onClick= {() => deleteTask(index)}>
-                    Delete
-                  </button>
+              
+                {tasks.map((task, index)=>
+                  <li key={index}>
+                    <span className={`text ${task.completed ?  "completed" : ""}`}>
+                      {task.text}
+                    </span>
+
+                      <button
+                        className="complete-button"
+                        onClick= {() => completeTask(index)}>
+                        Done
+                      </button>
+                      <button
+                        className="delete-button"
+                        onClick= {() => deleteTask(index)}>
+                        Delete
+                      </button>
+
 
                 </li>
+              
               )}
             </ol>
-
+          </div>
   
           
           </div>);

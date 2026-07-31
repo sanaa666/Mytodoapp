@@ -1,6 +1,7 @@
 h1{
   font-size: 3rem;
-  font-family: tahoma, sans-serif;
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  text-align: center;
   text-justify: auto;
   margin-top: 20px;
   color: aliceblue;
@@ -12,11 +13,15 @@ h3{
   text-align: center;
   text-justify: auto;
   margin-top: 20px;
-  color: aliceblue;
+  color:azure;
 }
 
 .task-enter{
-padding: 2px;
+  padding: 2px;
+  height: 30px;
+  background-color: azure;
+  border-color: azure;
+  align-items: center;
 
 }
 
@@ -25,10 +30,13 @@ body{
 }
 
 .task{
-    text-align: center;
+    text-align:center;
     text-justify: auto;
     font-size: large;
     font-weight: bold;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    color: rgb(183, 114, 138);
+    display:list-item;
 }
 
 
@@ -41,29 +49,50 @@ button{
 }
 
 .add-button{
-  color: blueviolet;
+  color:white;
   font-weight: bold;
   cursor: pointer;
-  
+  background-color: rgb(252, 212, 228);
+  border-color: rgb(189, 132, 155);
 }
 
 .delete-button{
   height:fit-content;
-  padding: 6px;
-  font-weight: lighter;
-  border-radius: 10px;
-  font-size: smaller;
-  text-align: end;
   
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  font-weight: lighter;
+  border-radius: 20px;
+  justify-content: center;
+  font-size: small;
+  background-color: rgb(252, 212, 228);
+  border-color: rgb(189, 132, 155);
+  color: rgb(189, 132, 155);
+  font-weight:lighter;
+}
+
+.tasks-container{
+  display:flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .complete-button{
   height:fit-content;
-  padding: 6px;
-  border-radius: 10px;
-  font-size: smaller;
-  text-align: end;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 5px;
+  padding-bottom: 5px;
   font-weight: lighter;
+  border-radius: 20px;
+  font-size: small;
+  background-color: rgb(252, 212, 228);
+  border-color: rgb(189, 132, 155);
+  color: rgb(189, 132, 155);
+  font-weight:lighter;
+  border-color: rgb(155, 105, 125);
 }
 
 .complete-button:active + .task {
@@ -73,5 +102,5 @@ button{
 
 .text.completed{
   text-decoration: line-through;
-  color: #888;
+  color: #ceb1b1;
 }
