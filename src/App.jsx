@@ -1,9 +1,18 @@
 import './index.css'
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 
 function ToDo(){
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(()=>{
+    const savedTasks = localStorage.getItem("tasks");
+    return savedTasks ? JSON.parse(savedTasks) : [];
+  });
+
   const [newTask, setNewTask] = useState("");
+    
+
+  useEffect(()=>{
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);   
 
   const incompleteCount = tasks.filter(task => !task.completed).length;
 
@@ -13,6 +22,7 @@ function ToDo(){
 
   
   function addItem(){
+      if (newTask.trim() === "") return;
       setTasks(t=> [...t, {text: newTask, completed:false}]);
       setNewTask("")
 
