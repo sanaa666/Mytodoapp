@@ -8,7 +8,7 @@ function ToDo(){
   });
 
   const [newTask, setNewTask] = useState("");
-    
+  const [filter, setFilter] = useState("all");
 
   useEffect(()=>{
     localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -23,7 +23,7 @@ function ToDo(){
   
   function addItem(){
       if (newTask.trim() === "") return;
-      setTasks(t=> [...t, {text: newTask, completed:false}]);
+      setTasks(t=> [...t, {text: newTask, completed:false, status: "in progress"}]);
       setNewTask("")
 
   }
@@ -39,6 +39,14 @@ function ToDo(){
     setTasks(updatedTasks);
   }
 
+  const displayedTasks = tasks.filter(task => {
+    if (filter === "completed") {
+      return task.completed;
+    } else if (filter === "in progress") {  
+      return !task.completed;
+  
+    } return true;
+  });
 
   return(
     
@@ -62,7 +70,7 @@ function ToDo(){
           <div className="tasks-container">
             <ol>
               
-                {tasks.map((task, index)=>
+                {displayedTasks.map((task, index)=>
                   <li key={index}>
                     <span className={`text ${task.completed ?  "completed" : ""}`}>
                       {task.text}
@@ -71,7 +79,7 @@ function ToDo(){
                       <button
                         className="complete-button"
                         onClick= {() => completeTask(index)}>
-                        Done
+                        {task.completed ? "Undo" : "Done"}
                       </button>
                       <button
                         className="delete-button"
@@ -85,10 +93,14 @@ function ToDo(){
               )}
             </ol>
           </div>
-  
-          
-          </div>);
+          <div className="filter-buttons">
+            <button onClick={() => setFilter("all")}>All</button>
+            <button onClick={() => setFilter("completed")}>Completed</button>
+            <button onClick={() => setFilter("in progress")}>Active</button>
 
+          </div>
+          </div>
+
+  );
 }
-
 export default ToDo

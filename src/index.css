@@ -58,7 +58,6 @@ button{
 
 .delete-button{
   height:fit-content;
-  
   padding-left: 10px;
   padding-right: 10px;
   padding-top: 5px;
@@ -77,6 +76,17 @@ button{
   display:flex;
   flex-direction: column;
   align-items: center;
+}
+
+
+.tasks-enter{
+  padding: 2px;
+  height: 30px;
+  border-radius: 5px;
+  background-color: azure;
+  border-color: azure;
+  align-items: center;
+
 }
 
 .complete-button{
@@ -104,3 +114,36 @@ button{
   text-decoration: line-through;
   color: #ceb1b1;
 }
+
+.filter-buttons{
+  display:flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.filter-buttons button{
+  font-weight:lighter;
+  cursor: pointer;
+  border-radius: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  color:white;
+  font-weight:normal;
+  cursor: pointer;
+  background-color: rgb(252, 212, 228);
+  border-color: rgb(189, 132, 155);
+}
+
+.filter-buttons button:hover{
+  background-color: rgb(189, 132, 155);
+  color: aliceblue;
+}
+
+.add-button:hover{
+  background-color: rgb(189, 132, 155);
+  color: aliceblue;
+}
+
