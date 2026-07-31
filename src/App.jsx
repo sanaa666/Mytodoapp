@@ -53,6 +53,7 @@ function ToDo(){
           <div className="task">
             <h1>To Do</h1>
             <h3>Items still not complete: {incompleteCount}</h3>
+            <button onClick={() => setTasks(tasks => tasks.filter(task => !task.completed))} className="clear-button">Clear All Completed</button>
             <div>
               <input
                       type="text"

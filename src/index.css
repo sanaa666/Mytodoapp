@@ -70,6 +70,7 @@ button{
   border-color: rgb(189, 132, 155);
   color: rgb(189, 132, 155);
   font-weight:lighter;
+  margin-left: 5px;
 }
 
 .tasks-container{
@@ -95,6 +96,8 @@ button{
   padding-right: 8px;
   padding-top: 5px;
   padding-bottom: 5px;
+  margin-left: 5px;
+  margin-bottom: 5px;
   font-weight: lighter;
   border-radius: 20px;
   font-size: small;
@@ -143,6 +146,25 @@ button{
 }
 
 .add-button:hover{
+  background-color: rgb(189, 132, 155);
+  color: aliceblue;
+}
+
+.clear-button{
+  font-weight:lighter;
+  cursor: pointer;
+
+  color:white;
+  font-weight:normal;
+  cursor: pointer;
+  background-color: rgb(252, 212, 228);
+  border-color: rgb(189, 132, 155);
+  position: absolute;
+  right: 20px;
+  top: 20px;
+}
+
+.clear-button:hover{
   background-color: rgb(189, 132, 155);
   color: aliceblue;
 }
