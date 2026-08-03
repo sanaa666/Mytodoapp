@@ -1,8 +1,14 @@
+import { Header } from './components/Header';
+import AddButton from './components/AddButton';
+import TasksContainer from './components/TasksContainer';
+import FilterButtons from './components/FilterButtons';
+import Input from './components/Input';
+import ClearButton from './components/ClearButton';
 import './index.css'
 import {useState, useEffect} from 'react';
 
 function ToDo(){
-  const [tasks, setTasks] = useState(()=>{
+  const [tasks, setTasks] = useState(()=> {
     const savedTasks = localStorage.getItem("tasks");
     return savedTasks ? JSON.parse(savedTasks) : [];
   });
@@ -82,82 +88,31 @@ function ToDo(){
 
 
   return(
-    
           <div className="task">
-            <h1>To Do</h1>
-            <h3>Items still not complete: {incompleteCount}</h3>
-            <button onClick={() => setTasks(tasks => tasks.filter(task => !task.completed))} className="clear-button">Clear All Completed</button>
+            <Header incompleteCount={incompleteCount} />
+            <ClearButton setTasks={setTasks} />
             <div>
-              <input
-                      type="text"
-                      placeholder="Enter task..."
-                      className="task-enter"
-                      value={newTask}
-                      onChange={handleInputChange}
-                      onKeyDown={(e) => {
-                            if (e.key === "Enter") {addItem};
-                      }}/>
-                    <button
-                      className="add-button"
-                      onClick={addItem}>
-                      Add
-                    </button>
+                      <Input
+                        newTask={newTask}
+                        handleInputChange={handleInputChange}
+                        addItem={addItem}
+                      /> 
+                      <AddButton addItem={addItem} />
             </div>
 
  
-          <div className="tasks-container">
-            <ol>
-                {displayedTasks.map((task, index)=>
-                  <li key={index}>
-                    {editingIndex === index ? (
-                      <div>
-                        <input
-                          type="text"
-                          value={editText}
-                          onChange={(e) => setEditText(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") saveEdit(index);
-                            if (e.key === "Escape") cancelEdit();
-                          }}
-                        />
-
-                      <button className="save-button" onClick={() => saveEdit(index)}>Save</button>
-                      <button className="cancel-button" onClick={cancelEdit}>Cancel</button>
-                      </div>
-                    ) : (
-                      <div>
-                        
-                      
-                        <span className={`text ${task.completed ?  "completed" : ""}`}
-                        onDoubleClick={() => startEditing(index, task.text)}
-                        style={{cursor: "pointer"}}>
-                          {task.text}
-                        </span>
-
-                          <button
-                            className="complete-button"
-                            onClick= {() => completeTask(index)}>
-                            {task.completed ? "Undo" : "Done"}
-                          </button>
-                          <button
-                            className="delete-button"
-                            onClick= {() => deleteTask(index)}>
-                            Delete
-                          </button>
-                      </div>
-
-                    )}
-                    
-                  </li>
-              )}
-            </ol>
-          </div>
-          <div className="filter-buttons">
-            <button onClick={() => setFilter("all")}>All</button>
-            <button onClick={() => setFilter("completed")}>Completed</button>
-            <button onClick={() => setFilter("in progress")}>Active</button>
-
-          </div>
+          <TasksContainer
+            displayedTasks={displayedTasks}
+            editingIndex={editingIndex}
+            editText={editText}
+            setEditText={setEditText}
+            startEditing={startEditing}
+            saveEdit={saveEdit}
+            cancelEdit={cancelEdit}
+            completeTask={completeTask}
+            deleteTask={deleteTask}
+          />
+          <FilterButtons setFilter={setFilter} />
           </div>
 
   );
