@@ -162,8 +162,16 @@ button{
   position: fixed;
   right: 20px;
   top: 20px;
+  width:15%;
   height:10%;
-  display: flex;
+  font-size:95%;
+  padding:5%;
+  text-align: center;
+  text-justify: center;
+  align-items: center;
+  display:flexbox;
+  vertical-align: baseline;
+  overflow:wrap;
 }
 
 .clear-button:hover{
