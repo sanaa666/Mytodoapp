@@ -159,7 +159,7 @@ button{
   cursor: pointer;
   background-color: rgb(252, 212, 228);
   border-color: rgb(189, 132, 155);
-  position: absolute;
+  position: fixed;
   right: 20px;
   top: 20px;
 }
