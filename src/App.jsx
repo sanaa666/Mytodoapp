@@ -12,6 +12,12 @@ function ToDo(){
   const[editingIndex, setEditingIndex] = useState(null);
   const[editText, setEditText] = useState("");
   
+  const [key, setKey] = useState('');
+  const keyDown = event => {
+    setKey(event.key);
+  };
+
+
   const onDoubleClickHandler = () => {
     setEditingIndex(null);
     setEditText("");
@@ -87,7 +93,10 @@ function ToDo(){
                       placeholder="Enter task..."
                       className="task-enter"
                       value={newTask}
-                      onChange={handleInputChange}/>
+                      onChange={handleInputChange}
+                      onKeyDown={(e) => {
+                            if (e.key === "Enter") {addItem};
+                      }}/>
                     <button
                       className="add-button"
                       onClick={addItem}>
