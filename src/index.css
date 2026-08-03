@@ -169,3 +169,61 @@ button{
   color: aliceblue;
 }
 
+.edit-button{
+  height:fit-content;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-left: 5px;
+  margin-bottom: 5px;
+  font-weight: lighter;
+  border-radius: 20px;
+  font-size: small;
+  background-color: rgb(252, 212, 228);
+  border-color: rgb(189, 132, 155);
+  color: rgb(189, 132, 155);
+  font-weight:lighter;
+}
+
+.save-button{
+  height:fit-content;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-left: 5px;
+  margin-bottom: 5px;
+  font-weight: lighter;
+  border-radius: 20px;
+  font-size: small;
+  background-color: rgb(252, 212, 228);
+  border-color: rgb(189, 132, 155);
+  color: rgb(189, 132, 155);
+  font-weight:lighter;
+}
+
+.cancel-button{
+  height:fit-content;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-left: 5px;
+  margin-bottom: 5px;
+  font-weight: lighter;
+  border-radius: 20px;
+  font-size: small;
+  background-color: rgb(252, 212, 228);
+  border-color: rgb(189, 132, 155);
+  color: rgb(189, 132, 155);
+  font-weight:lighter;
+}
+
+.task-list{
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background-color: rgb(252, 212, 228);
+}
