@@ -169,7 +169,7 @@ button{
   text-align: center;
   text-justify: center;
   align-items: center;
-  display:flexbox;
+  display:static;
   vertical-align: baseline;
   overflow:wrap;
 }
