@@ -161,7 +161,7 @@ button{
   border-color: rgb(189, 132, 155);
   position: fixed;
   right: 20px;
-  top: 30px;
+  bottom: 20px;
   padding:2%;
   font-size: small;
   text-align: center;
