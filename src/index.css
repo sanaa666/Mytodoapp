@@ -162,7 +162,6 @@ button{
   position: fixed;
   right: 20px;
   top: 20px;
-  width:15%;
   height:10%
   display: flex;
 }
