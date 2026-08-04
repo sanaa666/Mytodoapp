@@ -15,7 +15,7 @@ function ToDo(){
 
   const [newTask, setNewTask] = useState("");
   const [filter, setFilter] = useState("all");
-  const[editingIndex, setEditingIndex] = useState(null);
+  const[editingId, setEditingId] = useState(null);
   const[editText, setEditText] = useState("");
   
   const [key, setKey] = useState('');
@@ -25,7 +25,7 @@ function ToDo(){
 
 
   const onDoubleClickHandler = () => {
-    setEditingIndex(null);
+    setEditingId(null);
     setEditText("");
   }
 
@@ -42,38 +42,43 @@ function ToDo(){
   
   function addItem(){
       if (newTask.trim() === "") return;
-      setTasks(t=> [...t, {text: newTask, completed:false, status: "in progress"}]);
+      const newTaskObject={
+        id: Date.now(),
+        text: newTask,
+        completed: false,
+      }
+      setTasks(t=> [...t, newTaskObject]);
       setNewTask("")
 
   }
 
-  function completeTask(index){
-    setTasks(tasks.map((task, i)=>
-      i === index ? {...task, completed: !task.completed} : task
+  function completeTask(id){
+    setTasks(tasks.map(task =>
+      task.id === id ? {...task, completed: !task.completed} : task
     ));
   }
 
-  function deleteTask(index){
-    const updatedTasks = tasks.filter((element, i) => i !== index);
+  function deleteTask(id){
+    const updatedTasks = tasks.filter(task => task.id !== id);
     setTasks(updatedTasks);
   }
 
-  function startEditing(index, text){
-    setEditingIndex(index);
+  function startEditing(id, text){
+    setEditingId(id);
     setEditText(text);
   }
 
-  function saveEdit(index){
+  function saveEdit(id){
     if (editText.trim() === "") return;
-    setTasks(tasks.map((task, i) =>
-      i === index ? {...task, text: editText} : task
+    setTasks(tasks.map(task =>
+      task.id === id ? {...task, text: editText} : task
     ));
-    setEditingIndex(null);
+    setEditingId(null);
     setEditText("");
   }
 
   function cancelEdit(){
-    setEditingIndex(null);
+    setEditingId(null);
     setEditText("");
   }
 
@@ -103,7 +108,7 @@ function ToDo(){
  
           <TasksContainer
             displayedTasks={displayedTasks}
-            editingIndex={editingIndex}
+            editingId={editingId}
             editText={editText}
             setEditText={setEditText}
             startEditing={startEditing}
