@@ -5,23 +5,15 @@ import FilterButtons from './components/FilterButtons';
 import Input from './components/Input';
 import ClearButton from './components/ClearButton';
 import './index.css'
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 
-function ToDo(){
-  const [tasks, setTasks] = useState(()=> {
-    const savedTasks = localStorage.getItem("tasks");
-    return savedTasks ? JSON.parse(savedTasks) : [];
-  });
+function ToDo() {
+  const [tasks, setTasks] = useState([])
 
   const [newTask, setNewTask] = useState("");
   const [filter, setFilter] = useState("all");
-  const[editingId, setEditingId] = useState(null);
-  const[editText, setEditText] = useState("");
-  
-  const [key, setKey] = useState('');
-  const keyDown = event => {
-    setKey(event.key);
-  };
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
 
 
   const onDoubleClickHandler = () => {
@@ -29,55 +21,102 @@ function ToDo(){
     setEditText("");
   }
 
-  useEffect(()=>{
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);   
+  useEffect(() => {
+    fetch("http://localhost:8000/todos")
+      .then(res => res.json())
+      .then(data => setTasks(data));
+  }, []);
 
   const incompleteCount = tasks.filter(task => !task.completed).length;
 
-  function handleInputChange(event){
+  function handleInputChange(event) {
     setNewTask(event.target.value);
   }
 
-  
-  function addItem(){
-      if (newTask.trim() === "") return;
-      const newTaskObject={
-        id: Date.now(),
+
+  async function addItem() {
+    if (newTask.trim() === "") return;
+
+    const response = await fetch("http://localhost:8000/todos", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
         text: newTask,
         completed: false,
-      }
-      setTasks(t=> [...t, newTaskObject]);
-      setNewTask("")
+        id: Date.now(),
+      }),
+    });
+
+    const createdTodo = await response.json();
+    setTasks(t => [...t, createdTodo]);
+    setNewTask("")
 
   }
 
-  function completeTask(id){
+  async function completeTask(id) {
+    const todo = tasks.find(task => task.id === id);
+
+    const response = await fetch(`http://localhost:8000/todos/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: todo.text,
+        completed: !todo.completed,
+      }),
+    });
+
+    const updatedTodo = await response.json();
+
     setTasks(tasks.map(task =>
-      task.id === id ? {...task, completed: !task.completed} : task
+      task.id === id ? updatedTodo : task
+
     ));
   }
 
-  function deleteTask(id){
-    const updatedTasks = tasks.filter(task => task.id !== id);
-    setTasks(updatedTasks);
+  async function deleteTask(id) {
+    await fetch(`http://localhost:8000/todos/${id}`, {
+      method: "DELETE",
+    });
+    setTasks(tasks.filter(task => task.id !== id));
   }
 
-  function startEditing(id, text){
+  function startEditing(id, text) {
     setEditingId(id);
     setEditText(text);
   }
 
-  function saveEdit(id){
+  async function saveEdit(id) {
     if (editText.trim() === "") return;
+
+    const todo = tasks.find(task => task.id === id);
+
+    const response = await fetch(`http://localhost:8000/todos/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+
+      },
+      body: JSON.stringify({
+        text: editText,
+        completed: todo.completed,
+        id: Date.now(),
+      })
+    });
+
+    const updatedTodo = await response.json();
+
     setTasks(tasks.map(task =>
-      task.id === id ? {...task, text: editText} : task
+      task.id === id ? updatedTodo : task
     ));
     setEditingId(null);
     setEditText("");
   }
 
-  function cancelEdit(){
+  function cancelEdit() {
     setEditingId(null);
     setEditText("");
   }
@@ -85,40 +124,40 @@ function ToDo(){
   const displayedTasks = tasks.filter(task => {
     if (filter === "completed") {
       return task.completed;
-    } else if (filter === "in progress") {  
+    } else if (filter === "in progress") {
       return !task.completed;
-  
+
     } return true;
   });
 
 
-  return(
-          <div className="task">
-            <Header incompleteCount={incompleteCount} />
-            <ClearButton setTasks={setTasks} />
-            <div>
-                      <Input
-                        newTask={newTask}
-                        handleInputChange={handleInputChange}
-                        addItem={addItem}
-                      /> 
-                      <AddButton addItem={addItem} />
-            </div>
+  return (
+    <div className="task">
+      <Header incompleteCount={incompleteCount} />
+      <ClearButton setTasks={setTasks} />
+      <div>
+        <Input
+          newTask={newTask}
+          handleInputChange={handleInputChange}
+          addItem={addItem}
+        />
+        <AddButton addItem={addItem} />
+      </div>
 
- 
-          <TasksContainer
-            displayedTasks={displayedTasks}
-            editingId={editingId}
-            editText={editText}
-            setEditText={setEditText}
-            startEditing={startEditing}
-            saveEdit={saveEdit}
-            cancelEdit={cancelEdit}
-            completeTask={completeTask}
-            deleteTask={deleteTask}
-          />
-          <FilterButtons setFilter={setFilter} />
-          </div>
+
+      <TasksContainer
+        displayedTasks={displayedTasks}
+        editingId={editingId}
+        editText={editText}
+        setEditText={setEditText}
+        startEditing={startEditing}
+        saveEdit={saveEdit}
+        cancelEdit={cancelEdit}
+        completeTask={completeTask}
+        deleteTask={deleteTask}
+      />
+      <FilterButtons setFilter={setFilter} />
+    </div>
 
   );
 }
