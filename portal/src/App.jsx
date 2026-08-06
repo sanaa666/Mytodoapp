@@ -22,7 +22,7 @@ function ToDo() {
   }
 
   useEffect(() => {
-    fetch("satisfied-expression-production-4d84.up.railway.app")
+    fetch(`$import.meta.env.VITE_API_URL}/todos`)
       .then(res => res.json())
       .then(data => {
         setTasks(data);
@@ -40,7 +40,7 @@ function ToDo() {
   async function addItem() {
     if (newTask.trim() === "") return;
 
-    const response = await fetch("satisfied-expression-production-4d84.up.railway.app", {
+    const response = await fetch(`$import.meta.env.VITE_API_URL}/todos`, {
       method: "POST",
       headers: {
         "Content-type": "application/json",
@@ -59,7 +59,7 @@ function ToDo() {
 
   async function completeTask(id) {
 
-    const response = await fetch(`satisfied-expression-production-4d84.up.railway.app/${id}`, {
+    const response = await fetch(`$import.meta.env.VITE_API_URL}/todos/${id}`, {
       method: "PATCH",
     });
 
@@ -72,7 +72,7 @@ function ToDo() {
   }
 
   async function deleteTask(id) {
-    await fetch(`satisfied-expression-production-4d84.up.railway.app/${id}`, {
+    await fetch(`$import.meta.env.VITE_API_URL}/todos/${id}`, {
       method: "DELETE",
     });
     setTasks(tasks.filter(task => task.id !== id));
@@ -88,7 +88,7 @@ function ToDo() {
 
     const todo = tasks.find(task => task.id === id);
 
-    const response = await fetch(`satisfied-expression-production-4d84.up.railway.app/${id}`, {
+    const response = await fetch(`$import.meta.env.VITE_API_URL}/todos/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
