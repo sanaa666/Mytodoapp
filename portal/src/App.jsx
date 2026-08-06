@@ -14,7 +14,7 @@ function ToDo() {
   const [filter, setFilter] = useState("all");
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
-
+  const [loading, setLoading] = useState(true);
 
   const onDoubleClickHandler = () => {
     setEditingId(null);
@@ -22,9 +22,12 @@ function ToDo() {
   }
 
   useEffect(() => {
-    fetch("https://satisfied-expression-production-4d84.up.railway.app/todos")
+    fetch("http://localhost:8000/todos")
       .then(res => res.json())
-      .then(data => setTasks(data));
+      .then(data => {
+        setTasks(data);
+        setLoading(false)
+      });
   }, []);
 
   const incompleteCount = tasks.filter(task => !task.completed).length;
@@ -37,7 +40,7 @@ function ToDo() {
   async function addItem() {
     if (newTask.trim() === "") return;
 
-    const response = await fetch("https://satisfied-expression-production-4d84.up.railway.app/todos", {
+    const response = await fetch("http://localhost:8000/todos", {
       method: "POST",
       headers: {
         "Content-type": "application/json",
@@ -45,7 +48,6 @@ function ToDo() {
       body: JSON.stringify({
         text: newTask,
         completed: false,
-        id: Date.now(),
       }),
     });
 
@@ -56,29 +58,21 @@ function ToDo() {
   }
 
   async function completeTask(id) {
-    const todo = tasks.find(task => task.id === id);
 
-    const response = await fetch(`https://satisfied-expression-production-4d84.up.railway.app/todos/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        text: todo.text,
-        completed: !todo.completed,
-      }),
+    const response = await fetch(`http://localhost:8000/todos/${id}`, {
+      method: "PATCH",
     });
 
     const updatedTodo = await response.json();
 
-    setTasks(tasks.map(task =>
+    setTasks(tasks => tasks.map(task =>
       task.id === id ? updatedTodo : task
 
     ));
   }
 
   async function deleteTask(id) {
-    await fetch(`https://satisfied-expression-production-4d84.up.railway.app/todos/${id}`, {
+    await fetch(`http://localhost:8000/todos/${id}`, {
       method: "DELETE",
     });
     setTasks(tasks.filter(task => task.id !== id));
@@ -94,7 +88,7 @@ function ToDo() {
 
     const todo = tasks.find(task => task.id === id);
 
-    const response = await fetch(`https://satisfied-expression-production-4d84.up.railway.app/todos/${id}`, {
+    const response = await fetch(`http://localhost:8000/todos/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -103,7 +97,6 @@ function ToDo() {
       body: JSON.stringify({
         text: editText,
         completed: todo.completed,
-        id: Date.now(),
       })
     });
 
@@ -129,6 +122,10 @@ function ToDo() {
 
     } return true;
   });
+
+  if (loading) {
+    return <h2>Loading...</h2>;
+  }
 
 
   return (

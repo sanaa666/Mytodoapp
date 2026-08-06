@@ -1,22 +1,31 @@
-h1{
+h1 {
   font-size: 3rem;
-  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   text-align: center;
   text-justify: auto;
   margin-top: 20px;
   color: aliceblue;
 }
 
-h3{
+h3 {
   font-size: 1rem;
-  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   text-align: center;
   text-justify: auto;
   margin-top: 20px;
-  color:azure;
+  color: azure;
 }
 
-.task-enter{
+h2 {
+  font-size: 1.5rem;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  text-align: center;
+  text-justify: auto;
+  margin-top: 50px;
+  color: azure;
+}
+
+.task-enter {
   padding: 2px;
   height: 30px;
   background-color: azure;
@@ -25,39 +34,39 @@ h3{
 
 }
 
-body{
-  background-color:pink;
+body {
+  background-color: pink;
 }
 
-.task{
-    text-align:center;
-    text-justify: auto;
-    font-size: large;
-    font-weight: bold;
-    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    color: rgb(183, 114, 138);
-    display:list-item;
+.task {
+  text-align: center;
+  text-justify: auto;
+  font-size: large;
+  font-weight: bold;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  color: rgb(183, 114, 138);
+  display: list-item;
 }
 
 
-button{
-  color:brown;
+button {
+  color: brown;
   font-weight: bold;
   padding: 10px 20px;
   border: none;
   cursor: pointer;
 }
 
-.add-button{
-  color:white;
+.add-button {
+  color: white;
   font-weight: bold;
   cursor: pointer;
   background-color: rgb(252, 212, 228);
   border-color: rgb(189, 132, 155);
 }
 
-.delete-button{
-  height:fit-content;
+.delete-button {
+  height: fit-content;
   padding-left: 10px;
   padding-right: 10px;
   padding-top: 5px;
@@ -69,18 +78,18 @@ button{
   background-color: rgb(252, 212, 228);
   border-color: rgb(189, 132, 155);
   color: rgb(189, 132, 155);
-  font-weight:lighter;
+  font-weight: lighter;
   margin-left: 5px;
 }
 
-.tasks-container{
-  display:flex;
+.tasks-container {
+  display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 
-.tasks-enter{
+.tasks-enter {
   padding: 2px;
   height: 30px;
   border-radius: 5px;
@@ -90,8 +99,8 @@ button{
 
 }
 
-.complete-button{
-  height:fit-content;
+.complete-button {
+  height: fit-content;
   padding-left: 8px;
   padding-right: 8px;
   padding-top: 5px;
@@ -104,81 +113,81 @@ button{
   background-color: rgb(252, 212, 228);
   border-color: rgb(189, 132, 155);
   color: rgb(189, 132, 155);
-  font-weight:lighter;
+  font-weight: lighter;
   border-color: rgb(155, 105, 125);
 }
 
-.complete-button:active + .task {
+.complete-button:active+.task {
   text-decoration: line-through;
-  
+
 }
 
-.text.completed{
+.text.completed {
   text-decoration: line-through;
   color: #ceb1b1;
 }
 
-.filter-buttons{
-  display:flex;
+.filter-buttons {
+  display: flex;
   justify-content: center;
   gap: 8px;
   margin-top: 8px;
 }
 
-.filter-buttons button{
-  font-weight:lighter;
+.filter-buttons button {
+  font-weight: lighter;
   cursor: pointer;
   border-radius: 10px;
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 10px;
   padding-bottom: 10px;
-  color:white;
-  font-weight:normal;
+  color: white;
+  font-weight: normal;
   cursor: pointer;
   background-color: rgb(252, 212, 228);
   border-color: rgb(189, 132, 155);
 }
 
-.filter-buttons button:hover{
+.filter-buttons button:hover {
   background-color: rgb(189, 132, 155);
   color: aliceblue;
 }
 
-.add-button:hover{
+.add-button:hover {
   background-color: rgb(189, 132, 155);
   color: aliceblue;
 }
 
-.clear-button{
-  font-weight:lighter;
+.clear-button {
+  font-weight: lighter;
   cursor: pointer;
 
-  color:white;
-  font-weight:normal;
+  color: white;
+  font-weight: normal;
   cursor: pointer;
   background-color: rgb(252, 212, 228);
   border-color: rgb(189, 132, 155);
   position: fixed;
   right: 20px;
   bottom: 20px;
-  padding:2%;
+  padding: 2%;
   font-size: small;
   text-align: center;
   text-justify: center;
   align-items: center;
-  display:static;
+  display: static;
   vertical-align: baseline;
-  overflow:wrap;
+  overflow: wrap;
 }
 
-.clear-button:hover{
+.clear-button:hover {
   background-color: rgb(189, 132, 155);
   color: aliceblue;
 }
 
-.edit-button{
-  height:fit-content;
+.edit-button {
+  height: fit-content;
   padding-left: 8px;
   padding-right: 8px;
   padding-top: 5px;
@@ -191,11 +200,11 @@ button{
   background-color: rgb(252, 212, 228);
   border-color: rgb(189, 132, 155);
   color: rgb(189, 132, 155);
-  font-weight:lighter;
+  font-weight: lighter;
 }
 
-.save-button{
-  height:fit-content;
+.save-button {
+  height: fit-content;
   padding-left: 8px;
   padding-right: 8px;
   padding-top: 5px;
@@ -208,11 +217,11 @@ button{
   background-color: rgb(252, 212, 228);
   border-color: rgb(189, 132, 155);
   color: rgb(189, 132, 155);
-  font-weight:lighter;
+  font-weight: lighter;
 }
 
-.cancel-button{
-  height:fit-content;
+.cancel-button {
+  height: fit-content;
   padding-left: 8px;
   padding-right: 8px;
   padding-top: 5px;
@@ -225,11 +234,11 @@ button{
   background-color: rgb(252, 212, 228);
   border-color: rgb(189, 132, 155);
   color: rgb(189, 132, 155);
-  font-weight:lighter;
+  font-weight: lighter;
 }
 
-.task-list{
-  display:flex;
+.task-list {
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
