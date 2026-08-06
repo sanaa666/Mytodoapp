@@ -8,6 +8,9 @@ import './index.css'
 import { useState, useEffect } from 'react';
 
 function ToDo() {
+
+  console.log("API URL:", import.meta.env.VITE_API_URL);
+
   const [tasks, setTasks] = useState([])
 
   const [newTask, setNewTask] = useState("");
@@ -22,9 +25,10 @@ function ToDo() {
   }
 
   useEffect(() => {
-    fetch(`$import.meta.env.VITE_API_URL}/todos`)
+    fetch(`${import.meta.env.VITE_API_URL}/todos`)
       .then(res => res.json())
       .then(data => {
+        console.log(data);
         setTasks(data);
         setLoading(false)
       });
@@ -40,7 +44,7 @@ function ToDo() {
   async function addItem() {
     if (newTask.trim() === "") return;
 
-    const response = await fetch(`$import.meta.env.VITE_API_URL}/todos`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/todos`, {
       method: "POST",
       headers: {
         "Content-type": "application/json",
@@ -59,7 +63,7 @@ function ToDo() {
 
   async function completeTask(id) {
 
-    const response = await fetch(`$import.meta.env.VITE_API_URL}/todos/${id}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/todos/${id}`, {
       method: "PATCH",
     });
 
@@ -72,7 +76,7 @@ function ToDo() {
   }
 
   async function deleteTask(id) {
-    await fetch(`$import.meta.env.VITE_API_URL}/todos/${id}`, {
+    await fetch(`${import.meta.env.VITE_API_URL}/todos/${id}`, {
       method: "DELETE",
     });
     setTasks(tasks.filter(task => task.id !== id));
@@ -88,7 +92,7 @@ function ToDo() {
 
     const todo = tasks.find(task => task.id === id);
 
-    const response = await fetch(`$import.meta.env.VITE_API_URL}/todos/${id}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/todos/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
