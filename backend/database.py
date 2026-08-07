@@ -1,18 +1,19 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+import sqlite3
 
-DATABASE_URL = "sqlite:///./todos.db"
+def init_db():
+    conn = sqlite3.connect("todos.db")
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False}
+    cursor = conn.cursor()
 
-)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS todos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            text TEXT NOT NULL,
+            completed INTEGER NOT NULL
+        )
+    """)
 
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
+    conn.commit()
+    conn.close()
 
-Base = declarative_base()
+init_db()
