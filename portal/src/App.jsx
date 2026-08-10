@@ -32,11 +32,18 @@ function ToDo() {
 
     console.log("USERNAME:", username);
     fetch(`${import.meta.env.VITE_API_URL}/todos?username=${username}`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("User not found");
+        return res.json();
+      })
       .then(data => {
-        console.log(data);
         setTasks(data);
         setLoading(false)
+      })
+      .catch(err => {
+        console.log(err);
+        setTasks([]);
+        setLoading(false);
       });
   }, [username]);
 
@@ -65,11 +72,8 @@ function ToDo() {
 
           if (response.ok) {
             setUsername(usernameInput);
-          } else {
-            setUsername(usernameInput);
           }
-        }}
-        >
+        }}>
           Continue
         </button>
       </div >
