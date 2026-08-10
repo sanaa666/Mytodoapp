@@ -272,3 +272,8 @@ button {
   justify-content: center;
   margin-top: 40px;
 }
+
+.continue-button:hover {
+  background-color: rgb(189, 132, 155);
+  color: aliceblue;
+}
