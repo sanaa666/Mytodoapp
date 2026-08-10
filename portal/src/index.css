@@ -62,7 +62,6 @@ button {
   font-weight: bold;
   cursor: pointer;
   background-color: rgb(252, 212, 228);
-  border-color: rgb(189, 132, 155);
 }
 
 .delete-button {
@@ -246,21 +245,30 @@ button {
 }
 
 .username-input {
+  height: 35px;
   padding: 2px;
-  align-items: centre;
-  text-align: center;
+  box-sizing: border-box;
+  background-color: azure;
+  border-color: azure;
 }
 
 .continue-button {
+  height: 35px;
+  box-sizing: border-box;
   color: white;
   font-weight: bold;
   cursor: pointer;
   background-color: rgb(252, 212, 228);
   border-color: rgb(189, 132, 155);
+  text-align: center;
+  justify-content: center;
 }
 
-.enter-container {
+
+.username-form {
   display: flex;
-  justify-content: center;
   align-items: center;
+  text-align: center;
+  justify-content: center;
+  margin-top: 40px;
 }
