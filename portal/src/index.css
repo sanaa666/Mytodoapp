@@ -244,3 +244,23 @@ button {
   gap: 8px;
   background-color: rgb(252, 212, 228);
 }
+
+.username-input {
+  padding: 2px;
+  align-items: centre;
+  text-align: center;
+}
+
+.continue-button {
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: rgb(252, 212, 228);
+  border-color: rgb(189, 132, 155);
+}
+
+.enter-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

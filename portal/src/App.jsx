@@ -49,31 +49,35 @@ function ToDo() {
     return (
       <div>
         <h2> Enter your username: </h2>
-        <input
-          value={usernameInput}
-          onChange={(e) => setUsernameInput(e.target.value)}
-        />
+        <div className="enter-container">
+          <div className='username-input'>
+            <input
+              value={usernameInput}
+              onChange={(e) => setUsernameInput(e.target.value)}
+            />
+          </div>
 
-        <button onClick={async () => {
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/users`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                username: usernameInput,
-              }),
+          <button className="continue-button" onClick={async () => {
+            const response = await fetch(
+              `${import.meta.env.VITE_API_URL}/users`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  username: usernameInput,
+                }),
+              }
+            );
+
+            if (response.ok) {
+              setUsername(usernameInput);
             }
-          );
-
-          if (response.ok) {
-            setUsername(usernameInput);
-          }
-        }}>
-          Continue
-        </button>
+          }}>
+            Continue
+          </button>
+        </div>
       </div >
     );
   }
