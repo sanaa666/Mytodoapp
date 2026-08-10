@@ -185,6 +185,32 @@ button {
   color: aliceblue;
 }
 
+.logout-button {
+  font-weight: lighter;
+  cursor: pointer;
+  color: white;
+  font-weight: normal;
+  cursor: pointer;
+  background-color: rgb(252, 212, 228);
+  border-color: rgb(189, 132, 155);
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  padding: 2%;
+  font-size: small;
+  text-align: center;
+  text-justify: center;
+  align-items: center;
+  display: static;
+  vertical-align: baseline;
+  overflow: wrap;
+}
+
+.logout-button:hover {
+  background-color: rgb(189, 132, 155);
+  color: aliceblue;
+}
+
 .edit-button {
   height: fit-content;
   padding-left: 8px;

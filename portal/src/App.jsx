@@ -20,12 +20,28 @@ function ToDo() {
   const [editText, setEditText] = useState("");
   const [loading, setLoading] = useState(true);
 
-
+  const handleChange = (e) => {
+    const value = e.target.value
+    setUsernameInput(value)
+  }
 
   const onDoubleClickHandler = () => {
     setEditingId(null);
     setEditText("");
   }
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (!savedUser) {
+      setLoading(false);
+      return;
+    }
+
+    const user = JSON.parse(savedUser);
+
+    setUsername(user.username);
+    setUserId(user.userId);
+  }, []);
 
   useEffect(() => {
     if (!userId) return;
@@ -55,7 +71,7 @@ function ToDo() {
             placeholder='Enter a username...'
             className="username-input"
             value={usernameInput}
-            onChange={(e) => setUsernameInput(e.target.value)}
+            onChange={handleChange}
           />
 
 
@@ -80,6 +96,14 @@ function ToDo() {
 
                 setUsername(user.username);
                 setUserId(user.id);
+
+                localStorage.setItem(
+                  "user",
+                  JSON.stringify({
+                    username: user.username,
+                    userId: user.id
+                  })
+                )
               }
             }}
           >
@@ -240,7 +264,18 @@ function ToDo() {
         deleteTask={deleteTask}
       />
       <FilterButtons setFilter={setFilter} />
-    </div>
+      <button
+        className="logout-button"
+        onClick={() => {
+          localStorage.removeItem("user");
+          setUsername("");
+          setUserId(null);
+          setTasks([]);
+        }}
+      >
+        Log out
+      </button>
+    </div >
 
   );
 }
