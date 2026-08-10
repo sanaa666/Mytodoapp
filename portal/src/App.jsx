@@ -269,6 +269,7 @@ function ToDo() {
         onClick={() => {
           localStorage.removeItem("user");
           setUsername("");
+          setUsernameInput("");
           setUserId(null);
           setTasks([]);
         }}
