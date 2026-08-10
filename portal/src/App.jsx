@@ -28,6 +28,8 @@ function ToDo() {
   }
 
   useEffect(() => {
+    if (!username) return;
+
     console.log("USERNAME:", username);
     fetch(`${import.meta.env.VITE_API_URL}/todos?username=${username}`)
       .then(res => res.json())
