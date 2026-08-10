@@ -10,8 +10,9 @@ import { useState, useEffect } from 'react';
 function ToDo() {
 
   console.log("API URL:", import.meta.env.VITE_API_URL);
-
-  const [tasks, setTasks] = useState([])
+  const [username, setUsername] = useState("");
+  const [usernameInput, setUsernameInput] = useState("");
+  const [tasks, setTasks] = useState([]);
 
   const [newTask, setNewTask] = useState("");
   const [filter, setFilter] = useState("all");
@@ -19,20 +20,59 @@ function ToDo() {
   const [editText, setEditText] = useState("");
   const [loading, setLoading] = useState(true);
 
+
+
   const onDoubleClickHandler = () => {
     setEditingId(null);
     setEditText("");
   }
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/todos`)
+    console.log("USERNAME:", username);
+    fetch(`${import.meta.env.VITE_API_URL}/todos?username=${username}`)
       .then(res => res.json())
       .then(data => {
         console.log(data);
         setTasks(data);
         setLoading(false)
       });
-  }, []);
+  }, [username]);
+
+  if (!username) {
+    return (
+      <div>
+        <h2> Enter your username: </h2>
+        <input
+          value={usernameInput}
+          onChange={(e) => setUsernameInput(e.target.value)}
+        />
+
+        <button onClick={async () => {
+          const response = await fetch(
+            `${import.meta.env.VITE_API_URL}/users`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                username: usernameInput,
+              }),
+            }
+          );
+
+          if (response.ok) {
+            setUsername(usernameInput);
+          } else {
+            setUsername(usernameInput);
+          }
+        }}
+        >
+          Continue
+        </button>
+      </div >
+    );
+  }
 
   const incompleteCount = tasks.filter(task => !task.completed).length;
 
@@ -44,16 +84,19 @@ function ToDo() {
   async function addItem() {
     if (newTask.trim() === "") return;
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/todos`, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({
-        text: newTask,
-        completed: false,
-      }),
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/todos?username=${username}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          text: newTask,
+          completed: false,
+        }),
+      }
+    );
 
     const createdTodo = await response.json();
     setTasks(t => [...t, createdTodo]);
@@ -63,9 +106,12 @@ function ToDo() {
 
   async function completeTask(id) {
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/todos/${id}`, {
-      method: "PATCH",
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/todos/${id}?username=${username}`,
+      {
+        method: "PATCH",
+      }
+    );
 
     const updatedTodo = await response.json();
 
@@ -76,9 +122,12 @@ function ToDo() {
   }
 
   async function deleteTask(id) {
-    await fetch(`${import.meta.env.VITE_API_URL}/todos/${id}`, {
-      method: "DELETE",
-    });
+    await fetch(
+      `${import.meta.env.VITE_API_URL}/todos/${id}?username=${username}`,
+      {
+        method: "DELETE",
+      }
+    );
     setTasks(tasks.filter(task => task.id !== id));
   }
 
@@ -92,7 +141,7 @@ function ToDo() {
 
     const todo = tasks.find(task => task.id === id);
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/todos/${id}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/todos/${id}?username=${username}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
