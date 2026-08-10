@@ -41,13 +41,7 @@ def get_todos(username: str):
     
 
     user_id = user[0]
-    print("USERNAME:", username)
-    print("USER ID:, user_id")
-    cursor.execute("SELECT id, username FROM users")
-    print("USERS:", cursor.fetchall())
- 
-    cursor.execute("SELECT id, text, user_id FROM todos")
-    print("ALL TODOS:", cursor.fetchall())
+    
     
     cursor.execute(
         "SELECT id, text, completed, user_id FROM todos WHERE user_id = ?",

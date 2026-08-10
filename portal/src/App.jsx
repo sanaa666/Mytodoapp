@@ -9,7 +9,6 @@ import { useState, useEffect } from 'react';
 
 function ToDo() {
 
-  console.log("API URL:", import.meta.env.VITE_API_URL);
   const [username, setUsername] = useState("");
   const [usernameInput, setUsernameInput] = useState("");
   const [tasks, setTasks] = useState([]);
@@ -30,7 +29,6 @@ function ToDo() {
   useEffect(() => {
     if (!username) return;
 
-    console.log("USERNAME:", username);
     fetch(`${import.meta.env.VITE_API_URL}/todos?username=${username}`)
       .then(res => {
         if (!res.ok) throw new Error("User not found");
