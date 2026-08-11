@@ -1,14 +1,24 @@
 h1 {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   text-align: center;
   text-justify: auto;
-  margin-top: 20px;
+  margin-top: 30px;
   color: aliceblue;
+  text-transform: capitalize;
 }
 
 h3 {
   font-size: 1rem;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  text-align: center;
+  text-justify: auto;
+  margin-top: 20px;
+  color: azure;
+}
+
+h4 {
+  font-size: 1.5rem;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   text-align: center;
   text-justify: auto;
@@ -21,7 +31,7 @@ h2 {
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   text-align: center;
   text-justify: auto;
-  margin-top: 50px;
+  margin-top: 40px;
   color: azure;
 }
 

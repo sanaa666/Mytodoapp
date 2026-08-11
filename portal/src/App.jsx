@@ -70,7 +70,7 @@ function ToDo() {
           <input
             placeholder='Enter a username...'
             className="username-input"
-            value={usernameInput}
+            value={usernameInput.toLowerCase()}
             onChange={handleChange}
           />
 
@@ -240,6 +240,7 @@ function ToDo() {
 
   return (
     <div className="task">
+      <h1>{username}'s Todos</h1>
       <Header incompleteCount={incompleteCount} />
       <ClearButton setTasks={setTasks} />
       <div>
