@@ -313,3 +313,23 @@ button {
   background-color: rgb(189, 132, 155);
   color: aliceblue;
 }
+
+.delete-user-button {
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: pointer;
+  font-weight: normal;
+  cursor: pointer;
+  background-color: rgb(252, 212, 228);
+  color: rgb(189, 132, 155);
+  position: fixed;
+  bottom: 20px;
+  padding: 2%;
+  font-size: small;
+  text-align: center;
+  text-justify: center;
+  align-items: center;
+  display: static;
+  vertical-align: baseline;
+  overflow: wrap;
+}

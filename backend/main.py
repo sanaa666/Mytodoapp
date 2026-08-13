@@ -256,5 +256,41 @@ def delete_todo(todo_id:int, user_id: int):
     
     }
 
+@app.delete("/users")
+def delete_user(user_id:int):
+    conn = sqlite3.connect("todos.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT id FROM users
+        WHERE id = ?
+        """,
+        (user_id,)
+    )
+    
+    row = cursor.fetchone()
+
+    if row is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail="User not found")
+
+    cursor.execute(
+        "DELETE FROM todos WHERE user_id = ?",
+        (user_id,)
+    )
+
+    cursor.execute(
+        "DELETE FROM users WHERE id = ?",
+        (user_id,)
+    )
+ 
+    conn.commit()
+    conn.close()
+
+    return{
+        "message": "deleted"
+    }
+
    
    

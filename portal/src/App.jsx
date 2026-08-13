@@ -185,6 +185,15 @@ function ToDo() {
     setTasks(tasks.filter(task => task.id !== id));
   }
 
+  async function deleteUser(userId) {
+    await fetch(
+      `${import.meta.env.VITE_API_URL}/users?user_id/=${user_id}`,
+      {
+        method: "DELETE",
+      }
+    );
+  }
+
   function startEditing(id, text) {
     setEditingId(id);
     setEditText(text);
@@ -276,6 +285,20 @@ function ToDo() {
         }}
       >
         Log out
+      </button>
+      <button
+        className="delete-user-button"
+        onClick={() => {
+          deleteUser(userId);
+          localStorage.removeItem("user");
+          setUsername("");
+          setUsernameInput("");
+          setUserId(null);
+          setTasks([]);
+
+        }}
+      >
+        Delete User
       </button>
     </div >
 
