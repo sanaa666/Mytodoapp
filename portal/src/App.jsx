@@ -78,6 +78,7 @@ function ToDo() {
           <button
             className="continue-button"
             onClick={async () => {
+              if (usernameInput.trim() === "") return;
               const response = await fetch(
                 `${import.meta.env.VITE_API_URL}/users`,
                 {

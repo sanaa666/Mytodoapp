@@ -108,10 +108,16 @@ def create_user(user: CreateUser):
     conn = sqlite3.connect("todos.db")
     cursor = conn.cursor()
 
+    username = user.username.strip()
+
+    if username == "":
+        raise HTTPException(status_code=404, detail="Blank username.")
+
     cursor.execute(
         "SELECT id FROM users WHERE username = ?",
         (user.username,)
     )
+   
 
     existing_user = cursor.fetchone()
 
