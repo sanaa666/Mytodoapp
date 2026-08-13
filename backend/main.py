@@ -27,7 +27,7 @@ class CreateTodo(BaseModel):
 
 @app.get("/todos")
 def get_todos(user_id: int):
-    conn = sqlite3.connect("todos.db")
+    conn = database.get_connection()
     cursor = conn.cursor()
     
     cursor.execute(
@@ -50,7 +50,7 @@ def get_todos(user_id: int):
 
 @app.get("/todos/")
 def get_todo(todo_id: int, user_id:int):
-   conn = sqlite3.connect("todos.db")
+   conn = database.get_connection()
    cursor = conn.cursor()
 
    cursor.execute(
@@ -81,7 +81,7 @@ def get_todo(todo_id: int, user_id:int):
 
 @app.post("/todos")
 def create_todo(todo: CreateTodo, user_id: int):
-    conn = sqlite3.connect("todos.db")
+    conn = database.get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -105,7 +105,7 @@ def create_todo(todo: CreateTodo, user_id: int):
 
 @app.post("/users")
 def create_user(user: CreateUser):
-    conn = sqlite3.connect("todos.db")
+    conn = database.get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -142,7 +142,7 @@ def create_user(user: CreateUser):
 
 @app.patch("/todos")
 def complete_todo(todo_id: int, user_id: int):
-    conn = sqlite3.connect("todos.db")
+    conn = database.get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -184,7 +184,7 @@ def complete_todo(todo_id: int, user_id: int):
 
 @app.put("/todos")
 def edit_todo(todo_id:int, user_id:int, todo:CreateTodo):
-    conn = sqlite3.connect("todos.db")
+    conn = database.get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -223,7 +223,7 @@ def edit_todo(todo_id:int, user_id:int, todo:CreateTodo):
         
 @app.delete("/todos")
 def delete_todo(todo_id:int, user_id: int):
-    conn = sqlite3.connect("todos.db")
+    conn = database.get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -258,9 +258,8 @@ def delete_todo(todo_id:int, user_id: int):
 
 @app.delete("/users")
 def delete_user(user_id:int):
-    conn = sqlite3.connect("todos.db")
+    conn = database.get_connection()
     cursor = conn.cursor()
-    conn.execute("PRAGMA foreign_keys = ON")
 
     cursor.execute(
         """

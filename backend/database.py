@@ -1,9 +1,13 @@
 import sqlite3
 
+def get_connection():
+    conn = sqlite3.connect("todos.db")
+    conn.execute("PRAGMA foreign_keys = ON")
+    cursor = conn.cursor()
 
 def init_db():
     conn = sqlite3.connect("todos.db")
-    conn.execute("PRAGMA foreign_keys = ON")
+    conn = get_connection
     cursor = conn.cursor()
 
 
