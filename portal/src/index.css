@@ -1,5 +1,5 @@
 h1 {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   text-align: center;
   text-justify: auto;
@@ -329,7 +329,7 @@ button {
   text-align: center;
   text-justify: center;
   align-items: center;
-  display: static;
-  vertical-align: baseline;
+  display: block;
   overflow: wrap;
+  margin: 0 auto;
 }
