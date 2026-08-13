@@ -260,6 +260,7 @@ def delete_todo(todo_id:int, user_id: int):
 def delete_user(user_id:int):
     conn = sqlite3.connect("todos.db")
     cursor = conn.cursor()
+    conn.execute("PRAGMA foreign_keys = ON")
 
     cursor.execute(
         """
@@ -275,10 +276,10 @@ def delete_user(user_id:int):
         conn.close()
         raise HTTPException(status_code=404, detail="User not found")
 
-    cursor.execute(
-        "DELETE FROM todos WHERE user_id = ?",
-        (user_id,)
-    )
+    # cursor.execute(
+    #     "DELETE FROM todos WHERE user_id = ?",
+    #     (user_id,)
+    # )
 
     cursor.execute(
         "DELETE FROM users WHERE id = ?",
