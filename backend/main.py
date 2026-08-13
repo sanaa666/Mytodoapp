@@ -177,7 +177,7 @@ def complete_todo(todo_id: int, user_id: int):
     return{
         "id": row[0],
         "text": row[1],
-        "completed": bool(row[new_status]),
+        "completed": bool(new_status),
         "user_id": user_id
 
     }
