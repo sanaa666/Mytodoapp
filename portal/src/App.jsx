@@ -186,7 +186,7 @@ function ToDo() {
   }
 
   async function deleteUser(userId) {
-    const response = await fetch(
+    await fetch(
       `${import.meta.env.VITE_API_URL}/users?user_id=${userId}`,
       {
         method: "DELETE",
@@ -276,7 +276,7 @@ function ToDo() {
       <FilterButtons setFilter={setFilter} />
       <button
         className="logout-button"
-        onClick={() => {
+        onClick={async () => {
           localStorage.removeItem("user");
           setUsername("");
           setUsernameInput("");
@@ -288,9 +288,8 @@ function ToDo() {
       </button>
       <button
         className="delete-user-button"
-        onClick={async () => {
-          await deleteUser(userId);
-
+        onClick={() => {
+          deleteUser(userId);
           localStorage.removeItem("user");
           setUsername("");
           setUsernameInput("");
