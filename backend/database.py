@@ -7,7 +7,7 @@ def get_connection():
 
 def init_db():
     conn = sqlite3.connect("todos.db")
-    conn = get_connection
+    conn = get_connection()
     cursor = conn.cursor()
 
 
