@@ -46,7 +46,7 @@ function ToDo() {
   useEffect(() => {
     if (!userId) return;
 
-    fetch(`${import.meta.env.VITE_API_URL}/todos?user_id=${userId}`)
+    fetch(`/todos?user_id=${userId}`)
       .then(res => {
         if (!res.ok) throw new Error("User not found");
         return res.json();
@@ -80,7 +80,7 @@ function ToDo() {
             onClick={async () => {
               if (usernameInput.trim() === "") return;
               const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/users`,
+                `/users`,
                 {
                   method: "POST",
                   headers: {
@@ -129,30 +129,28 @@ function ToDo() {
     console.log("USER ID:", userId);
     console.log("NEW TASK:", newTask);
 
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/todos?user_id=${userId}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({
-          text: newTask,
-          completed: false,
-        }),
-      }
+    const response = await fetch(`http://localhost:8000/todos?user_id=${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        text: newTask,
+        completed: false,
+      }),
+    }
     );
 
-    const data = await response.json();
-    console.log("STATUS:", response.status);
-
-    console.log("RESPONSE:", data);
-
-
     if (!response.ok) {
-      console.log("ERROR:", data);
+      const errorText = await response.text();
+      console.error(`Server Error (${response.status}):`, errorText);
       return;
     }
+
+
+    const data = await response.json();
+
+
 
     setTasks(t => [...t, data]);
     setNewTask("");
@@ -162,7 +160,7 @@ function ToDo() {
   async function completeTask(id) {
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/todos?user_id=${userId}&todo_id=${id}`,
+      `/todos?user_id=${userId}&todo_id=${id}`,
       {
         method: "PATCH",
       }
@@ -178,7 +176,7 @@ function ToDo() {
 
   async function deleteTask(id) {
     await fetch(
-      `${import.meta.env.VITE_API_URL}/todos?user_id=${userId}&todo_id=${id}`,
+      `/todos?user_id=${userId}&todo_id=${id}`,
       {
         method: "DELETE",
       }
@@ -205,7 +203,7 @@ function ToDo() {
 
     const todo = tasks.find(task => task.id === id);
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/todos?user_id=${userId}&todo_id=${id}`, {
+    const response = await fetch(`/todos?user_id=${userId}&todo_id=${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

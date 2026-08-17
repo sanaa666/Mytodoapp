@@ -1,8 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-import database
+import psycopg2
+import traceback
+from config import load_config
 import sqlite3
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 app = FastAPI()
 
@@ -10,6 +15,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173",
+                   "http://127.0.0.1:5173",
+                   "http://localhost:8000",
                    "https://sanaa666.github.io"],
     allow_credentials=True,
     allow_methods=["*"],
@@ -22,27 +29,31 @@ class CreateUser(BaseModel):
 
 class CreateTodo(BaseModel):
     text: str
-    completed: bool = False
+    completed: int
+
+def get_db_connection():
+    config = load_config()
+    return psycopg2.connect(**config)
 
 
 @app.get("/todos")
 def get_todos(user_id: int):
-    conn = sqlite3.connect("todos.db")
-    cursor = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     
-    cursor.execute(
-        "SELECT id, text, completed, user_id FROM todos WHERE user_id = ?",
+    cur.execute(
+        "SELECT todo_id, todo_name, todo_completed, user_id FROM todos WHERE user_id = %s ORDER BY todo_id ASC;",
         (user_id,)
     )
-    rows = cursor.fetchall()
-
+    rows = cur.fetchall()
+    cur.close()
     conn.close()
 
     return[
         {
             "id": row[0],
             "text": row[1],
-            "completed": bool(row[2]),
+            "completed": row[2],
             "user_id": row[3]
         }
         for row in rows
@@ -50,20 +61,21 @@ def get_todos(user_id: int):
 
 @app.get("/todos/")
 def get_todo(todo_id: int, user_id:int):
-   conn = sqlite3.connect("todos.db")
-   cursor = conn.cursor()
+   conn = get_db_connection()
+   cur = conn.cursor()
 
-   cursor.execute(
+   cur.execute(
        """
-       SELECT id, text, completed, user_id
+       SELECT todo_id, todo_name, todo_completed, user_id
        FROM todos
-       WHERE id = ? AND user_id = ?
+       WHERE todo_id = %s AND user_id = %s;
        """,
        (todo_id, user_id)
    )
 
-   row = cursor.fetchone()
+   row = cur.fetchone()
 
+   cur.close()
    conn.close()
 
    if row is None:
@@ -73,7 +85,7 @@ def get_todo(todo_id: int, user_id:int):
    return{
         "id": row[0],
         "text": row[1],
-        "completed": bool(row[2]),
+        "completed": row[2],
         "user_id": row[3]
 
     }
@@ -81,86 +93,105 @@ def get_todo(todo_id: int, user_id:int):
 
 @app.post("/todos")
 def create_todo(todo: CreateTodo, user_id: int):
-    conn = sqlite3.connect("todos.db")
-    cursor = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
 
-    cursor.execute(
-        "INSERT INTO todos (text, completed, user_id) VALUES (?, ?, ?)",
-        (todo.text, int(todo.completed), user_id)
-        
-    )
+    try:
+        cur.execute(
+            """
+            INSERT INTO todos (todo_name, todo_completed, user_id)
+            VALUES (%s, %s, %s)
+            RETURNING todo_id;
+            """,
+            (todo.text, todo.completed, user_id)
+            
+        )
 
-    conn.commit()
+        row = cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=500, detail="failed to insert")
 
-    todo_id = cursor.lastrowid
+        todo_id = row[0]
+        conn.commit()
 
-    conn.close()
+        return{
+            "id": todo_id,
+            "text": todo.text,
+            "completed": todo.completed,
+            "user_id": user_id
+        }
 
-    return{
-        "id": todo_id,
-        "text": todo.text,
-        "completed": todo.completed,
-        "user_id": user_id
-    }
+    except Exception as e:
+        conn.rollback()
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        cur.close()
+        conn.close()
 
 @app.post("/users")
 def create_user(user: CreateUser):
-    conn = sqlite3.connect("todos.db")
-    cursor = conn.cursor()
 
     username = user.username.strip()
-
+    
     if username == "":
         raise HTTPException(status_code=404, detail="Blank username.")
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
 
-    cursor.execute(
-        "SELECT id FROM users WHERE username = ?",
-        (user.username,)
+   
+    cur.execute(
+        "SELECT user_id FROM users WHERE user_name = %s",
+        (username,)
     )
    
 
-    existing_user = cursor.fetchone()
+    existing_user = cur.fetchone()
 
     if existing_user:
+        cur.close()
         conn.close()
         return{
             "id": existing_user[0],
-            "username": user.username
+            "username": username
         }
 
-    cursor.execute(
-        "INSERT INTO users (username) VALUES (?)",
-        (user.username,)
+    cur.execute(
+        "INSERT INTO users (user_name) VALUES (%s) RETURNING user_id;",
+        (username,)
     )
 
+    user_id = cur.fetchone()[0]
     conn.commit()
 
-    user_id = cursor.lastrowid
 
+    cur.close()
     conn.close()
 
     return{
         "id": user_id,
-        "username": user.username
+        "username": username
 
     }
 
 
 @app.patch("/todos")
 def complete_todo(todo_id: int, user_id: int):
-    conn = sqlite3.connect("todos.db")
-    cursor = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
 
-    cursor.execute(
+    cur.execute(
         """
-        SELECT id, text, completed
+        SELECT todo_id, todo_name, todo_completed
         FROM todos
-        WHERE id = ? AND user_id = ?
+        WHERE todo_id = %s AND user_id = %s
         """,
         (todo_id, user_id)
     )
     
-    row = cursor.fetchone()
+    row = cur.fetchone()
     
        
     
@@ -171,53 +202,55 @@ def complete_todo(todo_id: int, user_id: int):
     new_status = 0 if row[2] else 1
 
 
-    cursor.execute(
-        "UPDATE todos SET completed = ? WHERE id = ? AND user_id = ?",
+    cur.execute(
+        "UPDATE todos SET todo_completed = %s WHERE todo_id = %s AND user_id = %s",
 
         (new_status, todo_id, user_id)
     )
 
     conn.commit()
+    cur.close()
     conn.close()
 
     return{
         "id": row[0],
         "text": row[1],
-        "completed": bool(new_status),
+        "completed": int(new_status),
         "user_id": user_id
 
     }
 
 @app.put("/todos")
 def edit_todo(todo_id:int, user_id:int, todo:CreateTodo):
-    conn = sqlite3.connect("todos.db")
-    cursor = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
 
-    cursor.execute(
+    cur.execute(
         """
-        SELECT id, text, completed
+        SELECT todo_id, todo_name, todo_completed
         FROM todos
-        WHERE id =? AND user_id = ?
+        WHERE todo_id =%s AND user_id = %s
         """,
         (todo_id, user_id)
     )
 
-    row = cursor.fetchone()
+    row = cur.fetchone()
 
     if row is None:
         conn.close()
         raise HTTPException(status_code=404, detail="Todo not found")
 
-    cursor.execute(
+    cur.execute(
         """
         UPDATE todos
-        SET text = ?, completed = ?
-        WHERE id = ? AND user_id = ?
+        SET todo_name = %s, todo_completed = %s
+        WHERE todo_id = %s AND user_id = %s
         """,
         (todo.text, int(todo.completed), todo_id, user_id)
     )
 
     conn.commit()
+    cur.close()
     conn.close()
 
     return{
@@ -229,74 +262,66 @@ def edit_todo(todo_id:int, user_id:int, todo:CreateTodo):
         
 @app.delete("/todos")
 def delete_todo(todo_id:int, user_id: int):
-    conn = sqlite3.connect("todos.db")
-    cursor = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
 
-    cursor.execute(
+    cur.execute(
         """
-        SELECT id, text, completed
+        SELECT todo_id, todo_name, todo_completed
         FROM todos
-        WHERE id = ? AND user_id = ?
+        WHERE todo_id = %s AND user_id = %s
         """,
         (todo_id, user_id)
     )
     
-    row = cursor.fetchone()
+    row = cur.fetchone()
 
     if row is None:
         conn.close()
         raise HTTPException(status_code=404, detail="Todo not found")
 
-    cursor.execute(
-        "DELETE FROM todos WHERE id = ? AND user_id = ?",
+    cur.execute(
+        "DELETE FROM todos WHERE todo_id = %s AND user_id = %s",
         (todo_id, user_id)
     )
  
     conn.commit()
+    cur.close()
     conn.close()
 
     return{
         "id": row[0],
         "text": row[1],
-        "completed": bool(row[2])
+        "completed": row[2],
+        "user_id": row[3]
     
     }
 
 @app.delete("/users")
 def delete_user(user_id:int):
-    conn = sqlite3.connect("todos.db")
-    cursor = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
 
-    cursor.execute(
-        """
-        SELECT id FROM users
-        WHERE id = ?
-        """,
-        (user_id,)
-    )
-    
-    row = cursor.fetchone()
+    try:
 
-    if row is None:
-        conn.close()
-        raise HTTPException(status_code=404, detail="User not found")
-
-    cursor.execute(
-        "DELETE FROM todos WHERE user_id = ?",
-        (user_id,)
-    )
-
-    cursor.execute(
-        "DELETE FROM users WHERE id = ?",
-        (user_id,)
-    )
+        cur.execute(
+            "DELETE FROM users WHERE user_id = %s;",
+            (user_id,)
+        )
  
-    conn.commit()
-    conn.close()
+        conn.commit()
+    finally:
+        cur.close()
+        conn.close()
 
-    return{
-        "message": "deleted"
-    }
 
    
    
+BASE_DIR = Path(__file__).resolve().parent
+DIST_DIR = BASE_DIR.parent / "portal" / "dist"
+
+app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
+
+@app.get("/")
+def serve_frontend():
+    return FileResponse(DIST_DIR / "index.html")
