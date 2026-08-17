@@ -7,6 +7,10 @@ import ClearButton from './components/ClearButton';
 import './index.css'
 import { useState, useEffect } from 'react';
 
+const API_BASE_URL = import.meta.env.PROD
+  ? 'https://satisfied-expression-production-4d84.up.railway.app'
+  : '';
+
 function ToDo() {
 
   const [username, setUsername] = useState("");
@@ -48,7 +52,7 @@ function ToDo() {
   useEffect(() => {
     if (!userId) return;
 
-    fetch(`/todos?user_id=${userId}`)
+    fetch(`${API_BASE_URL}/todos?user_id=${userId}`)
       .then(res => {
         if (!res.ok) throw new Error("User not found");
         return res.json();
@@ -95,7 +99,9 @@ function ToDo() {
               if (!cleanUsername || !cleanPassword) return;
 
 
-              const endpoint = isSignUp ? "/users" : "/login";
+              const endpoint = isSignUp
+                ? `${API_BASE_URL}/users`
+                : `${API_BASE_URL}/login`;
               try {
 
 
@@ -115,7 +121,7 @@ function ToDo() {
                 if (response.ok) {
                   const user = await response.json();
                   setUsername(user.username);
-                  setUserId(userId);
+                  setUserId(user.id);
                   localStorage.setItem(
                     "user",
                     JSON.stringify({
@@ -156,7 +162,7 @@ function ToDo() {
   async function addItem() {
     if (newTask.trim() === "") return;
 
-    const response = await fetch(`/todos?user_id=${userId}`, {
+    const response = await fetch(`${API_BASE_URL}/todos?user_id=${userId}`, {
       method: "POST",
       headers: {
         "Content-type": "application/json",
@@ -187,7 +193,7 @@ function ToDo() {
   async function completeTask(id) {
 
     const response = await fetch(
-      `/todos?user_id=${userId}&todo_id=${id}`,
+      `${API_BASE_URL}/todos?user_id=${userId}&todo_id=${id}`,
       {
         method: "PATCH",
       }
@@ -203,7 +209,7 @@ function ToDo() {
 
   async function deleteTask(id) {
     await fetch(
-      `/todos?user_id=${userId}&todo_id=${id}`,
+      `${API_BASE_URL}/todos?user_id=${userId}&todo_id=${id}`,
       {
         method: "DELETE",
       }
@@ -212,8 +218,7 @@ function ToDo() {
   }
 
   async function deleteUser(targetUserId) {
-    const apiUrl = import.meta.env.VITE_API_URL || "";
-    await fetch(`${apiUrl}/users?user_id=${targetUserId}`,
+    await fetch(`${API_BASE_URL}/users?user_id=${targetUserId}`,
       {
         method: "DELETE",
       }
@@ -230,7 +235,7 @@ function ToDo() {
 
     const todo = tasks.find(task => task.id === id);
 
-    const response = await fetch(`/todos?user_id=${userId}&todo_id=${id}`, {
+    const response = await fetch(`${API_BASE_URL}/todos?user_id=${userId}&todo_id=${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -321,7 +326,6 @@ function ToDo() {
           setUsername("");
           setUsernameInput("");
           setPasswordInput("");
-          setPassword("");
           setUserId(null);
           setTasks([]);
 
