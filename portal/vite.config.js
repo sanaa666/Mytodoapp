@@ -6,14 +6,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/users': {
-        target: 'http://127.0.0.1:8000',
-        changeOrigin: true,
-      },
-      '/todos': {
-        target: 'http://127.0.0.1:8000',
-        changeOrigin: true,
-      },
+      '/users': 'http://127.0.0.1:8000',
+      '/login': 'http://127.0.0.1:8000',
+      '/todos': 'http://127.0.0.1:8000',
+
     },
   },
 })

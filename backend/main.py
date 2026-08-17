@@ -1,15 +1,17 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, status, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 import traceback
 from config import load_config
-import sqlite3
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from typing import Optional
+import bcrypt
 
 app = FastAPI()
+
 
 
 app.add_middleware(
@@ -24,8 +26,9 @@ app.add_middleware(
 )
 
 
-class CreateUser(BaseModel):
+class UserCredentials(BaseModel):
     username: str
+    password: str
 
 class CreateTodo(BaseModel):
     text: str
@@ -53,7 +56,7 @@ def get_todos(user_id: int):
         {
             "id": row[0],
             "text": row[1],
-            "completed": row[2],
+            "completed": int(row[2]),
             "user_id": row[3]
         }
         for row in rows
@@ -85,8 +88,8 @@ def get_todo(todo_id: int, user_id:int):
    return{
         "id": row[0],
         "text": row[1],
-        "completed": row[2],
-        "user_id": row[3]
+        "completed": int(row[2]),
+        "user_id": row[3],
 
     }
 
@@ -103,7 +106,7 @@ def create_todo(todo: CreateTodo, user_id: int):
             VALUES (%s, %s, %s)
             RETURNING todo_id;
             """,
-            (todo.text, todo.completed, user_id)
+            (todo.text, int(todo.completed), user_id)
             
         )
 
@@ -117,7 +120,7 @@ def create_todo(todo: CreateTodo, user_id: int):
         return{
             "id": todo_id,
             "text": todo.text,
-            "completed": todo.completed,
+            "completed": int(todo.completed),
             "user_id": user_id
         }
 
@@ -131,51 +134,55 @@ def create_todo(todo: CreateTodo, user_id: int):
         conn.close()
 
 @app.post("/users")
-def create_user(user: CreateUser):
+def create_user(user: UserCredentials):
 
     username = user.username.strip()
+    password = user.password.strip()
     
-    if username == "":
-        raise HTTPException(status_code=404, detail="Blank username.")
-    
+    if not username:
+        raise HTTPException(status_code=400, detail="Blank username.")
+
+    if not password:
+        raise HTTPException(status_code=400, detail="Blank password.")
+
+    hashed_bytes = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    hashed_password = hashed_bytes.decode('utf-8')
+
     conn = get_db_connection()
     cur = conn.cursor()
 
-   
-    cur.execute(
-        "SELECT user_id FROM users WHERE user_name = %s",
-        (username,)
-    )
-   
+    try:
+        cur.execute(
+            "SELECT user_id FROM users WHERE user_name = %s",
+            (username,)
+        )
 
-    existing_user = cur.fetchone()
+        if cur.fetchone():
+            raise HTTPException(status_code=409, detail="Username already exists")
 
-    if existing_user:
-        cur.close()
-        conn.close()
+    
+
+        cur.execute(
+            "INSERT INTO users (user_name, password_hash) VALUES (%s, %s) RETURNING user_id;",
+            (username, hashed_password)
+        )
+
+
+        user_id = cur.fetchone()[0]
+        conn.commit()
+
         return{
-            "id": existing_user[0],
+            "id": user_id,
             "username": username
         }
 
-    cur.execute(
-        "INSERT INTO users (user_name) VALUES (%s) RETURNING user_id;",
-        (username,)
-    )
-
-    user_id = cur.fetchone()[0]
-    conn.commit()
-
-
-    cur.close()
-    conn.close()
-
-    return{
-        "id": user_id,
-        "username": username
-
-    }
-
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cur.close()
+        conn.close()
+    
 
 @app.patch("/todos")
 def complete_todo(todo_id: int, user_id: int):
@@ -216,7 +223,7 @@ def complete_todo(todo_id: int, user_id: int):
         "id": row[0],
         "text": row[1],
         "completed": int(new_status),
-        "user_id": user_id
+        "user_id": user_id,
 
     }
 
@@ -256,7 +263,7 @@ def edit_todo(todo_id:int, user_id:int, todo:CreateTodo):
     return{
         "id": todo_id,
         "text": todo.text,
-        "completed": todo.completed,
+        "completed": int(todo.completed),
         "user_id": user_id
     }
         
@@ -267,7 +274,7 @@ def delete_todo(todo_id:int, user_id: int):
 
     cur.execute(
         """
-        SELECT todo_id, todo_name, todo_completed
+        SELECT todo_id, todo_name, todo_completed, user_id
         FROM todos
         WHERE todo_id = %s AND user_id = %s
         """,
@@ -292,7 +299,7 @@ def delete_todo(todo_id:int, user_id: int):
     return{
         "id": row[0],
         "text": row[1],
-        "completed": row[2],
+        "completed": int(row[2]),
         "user_id": row[3]
     
     }
@@ -305,17 +312,67 @@ def delete_user(user_id:int):
     try:
 
         cur.execute(
-            "DELETE FROM users WHERE user_id = %s;",
+            "DELETE FROM users WHERE user_id = %s RETURNING user_id;",
             (user_id,)
         )
+        deleted_user = cur.fetchone()
+
+        if not deleted_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
  
         conn.commit()
+        return{"detail": "User" +str(user_id) +  "deleted successfully"}
     finally:
         cur.close()
         conn.close()
 
+@app.post("/login")
+def log_in(user: UserCredentials):
+    username = user.username.strip()
+    password = user.password.strip()
+        
+    if not username:
+        raise HTTPException(status_code=400, detail="Blank username.")
+    
+    if not password:
+        raise HTTPException(status_code=400, detail="Blank password.")
+        
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+            cur.execute(
+                "SELECT user_id, password_hash FROM users WHERE user_name = %s",
+                (username,),
+            )
 
-   
+            row = cur.fetchone()
+
+            if row is None:
+                 raise HTTPException(status_code=401, detail="Invalid user or pass")
+
+            user_id, stored_hash = row
+            try:
+
+                is_valid = bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
+            except Exception:
+                is_valid = False
+
+            if not is_valid:
+                raise HTTPException(status_code=401, detail="invalid user or pass")
+            
+    
+            return{
+                "id": user_id,
+                "username": username
+            }
+    
+    finally:
+            cur.close()
+            conn.close()
+        
+    
    
 BASE_DIR = Path(__file__).resolve().parent
 DIST_DIR = BASE_DIR.parent / "portal" / "dist"

@@ -19,6 +19,8 @@ function ToDo() {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const [loading, setLoading] = useState(true);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
 
   const handleChange = (e) => {
     const value = e.target.value
@@ -65,57 +67,86 @@ function ToDo() {
   if (!username) {
     return (
       <div className="enter-container">
-        <h2> Username: </h2>
+        <h2> {isSignUp ? "Sign Up" : "Log In"} </h2>
         <div className='username-form'>
           <input
-            placeholder='Enter a username...'
+            placeholder='Username'
             className="username-input"
-            value={usernameInput.toLowerCase()}
-            onChange={handleChange}
+            value={usernameInput}
+            onChange={(e) => setUsernameInput(e.target.value)}
           />
+
+          <input
+            type="password"
+            placeholder="Password"
+            className="password-input"
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+          />
+
 
 
           <button
             className="continue-button"
             onClick={async () => {
-              if (usernameInput.trim() === "") return;
-              const response = await fetch(
-                `/users`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    username: usernameInput,
-                  }),
+              const cleanUsername = usernameInput.trim().toLowerCase();
+              const cleanPassword = passwordInput.trim();
+
+              if (!cleanUsername || !cleanPassword) return;
+
+
+              const endpoint = isSignUp ? "/users" : "/login";
+              try {
+
+
+                const response = await fetch(endpoint,
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      username: cleanUsername,
+                      password: cleanPassword,
+                    }),
+                  }
+                );
+
+                if (response.ok) {
+                  const user = await response.json();
+                  setUsername(user.username);
+                  setUserId(userId);
+                  localStorage.setItem(
+                    "user",
+                    JSON.stringify({
+                      username: user.username,
+                      userId: user.id
+                    })
+                  );
+                } else {
+                  const errData = await response.json();
+                  alert(errData.detail || "Authentication failed");
                 }
-              );
-
-              if (response.ok) {
-                const user = await response.json();
-
-                setUsername(user.username);
-                setUserId(user.id);
-
-                localStorage.setItem(
-                  "user",
-                  JSON.stringify({
-                    username: user.username,
-                    userId: user.id
-                  })
-                )
+              } catch (err) {
+                console.error("Auth error:", err);
               }
             }}
           >
-            Continue
+            {isSignUp ? "Sign Up" : "Log In"}
           </button>
         </div>
-      </div >
+
+        <p className='sign-up'
+          onClick={() => setIsSignUp(!isSignUp)}
+
+        >
+          {isSignUp ? "Already have an account? Log in" : "Need an account? Sign up"}
+        </p>
+      </div>
     );
   }
 
-  const incompleteCount = tasks.filter(task => !task.completed).length;
+  const incompleteCount = tasks.filter((task) => task.completed === 0).length;
 
   function handleInputChange(event) {
     setNewTask(event.target.value);
@@ -125,18 +156,14 @@ function ToDo() {
   async function addItem() {
     if (newTask.trim() === "") return;
 
-
-    console.log("USER ID:", userId);
-    console.log("NEW TASK:", newTask);
-
-    const response = await fetch(`http://localhost:8000/todos?user_id=${userId}`, {
+    const response = await fetch(`/todos?user_id=${userId}`, {
       method: "POST",
       headers: {
         "Content-type": "application/json",
       },
       body: JSON.stringify({
         text: newTask,
-        completed: false,
+        completed: 0,
       }),
     }
     );
@@ -184,9 +211,9 @@ function ToDo() {
     setTasks(tasks.filter(task => task.id !== id));
   }
 
-  async function deleteUser(userId) {
-    await fetch(
-      `${import.meta.env.VITE_API_URL}/users?user_id=${userId}`,
+  async function deleteUser(targetUserId) {
+    const apiUrl = import.meta.env.VITE_API_URL || "";
+    await fetch(`${apiUrl}/users?user_id=${targetUserId}`,
       {
         method: "DELETE",
       }
@@ -234,9 +261,9 @@ function ToDo() {
 
   const displayedTasks = tasks.filter(task => {
     if (filter === "completed") {
-      return task.completed;
+      return task.completed === 1;
     } else if (filter === "in progress") {
-      return !task.completed;
+      return task.completed === 0;
 
     } return true;
   });
@@ -275,10 +302,11 @@ function ToDo() {
       <FilterButtons setFilter={setFilter} />
       <button
         className="logout-button"
-        onClick={async () => {
+        onClick={() => {
           localStorage.removeItem("user");
           setUsername("");
           setUsernameInput("");
+          setPasswordInput("");
           setUserId(null);
           setTasks([]);
         }}
@@ -292,6 +320,8 @@ function ToDo() {
           localStorage.removeItem("user");
           setUsername("");
           setUsernameInput("");
+          setPasswordInput("");
+          setPassword("");
           setUserId(null);
           setTasks([]);
 

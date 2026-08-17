@@ -6,14 +6,15 @@ def create_tables():
         """
                 CREATE TABLE IF NOT EXISTS users (
                     user_id SERIAL PRIMARY KEY,
-                    user_name VARCHAR(20) NOT NULL UNIQUE
+                    user_name VARCHAR(20) NOT NULL UNIQUE,
+                    password_hash VARCHAR (255) NOT NULL
                 )
         """,
         """
         CREATE TABLE IF NOT EXISTS todos(
             todo_id SERIAL PRIMARY KEY,
             todo_name VARCHAR(255) NOT NULL,
-            todo_completed INTEGER NOT NULL DEFAULT FALSE,
+            todo_completed INTEGER NOT NULL DEFAULT 0,
             user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE
             
         );
