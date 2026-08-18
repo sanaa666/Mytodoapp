@@ -44,8 +44,7 @@ class CreateTodo(BaseModel):
     completed: int
 
 def get_db_connection():
-    config = load_config()
-    database_url = os.getenv("https://satisfied-expression-production-4d84.up.railway.app/")
+    database_url = os.getenv(" ${{ Postgres.DATABASE_PRIVATE_URL }} ")
 
     if database_url:
         return psycopg2.connect(database_url)
