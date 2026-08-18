@@ -10,10 +10,18 @@ from fastapi.responses import FileResponse
 from typing import Optional
 import bcrypt
 
-assets_dir = DIST_DIR / "assets"
 app = FastAPI()
 
+BASE_DIR = Path(__file__).resolve().parent
+DIST_DIR = BASE_DIR / "portal" / "dist" if (BASE_DIR / "portal" / "dist").exists() else BASE_DIR.parent / "portal" / "dist"
 
+(DIST_DIR / "assets").mkdir(parents=True, exist_ok=True)
+
+app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name = "assets")
+
+@app.get("/")
+def serve_frontend():
+    return FileResponse(DIST_DIR / "index.html")
 
 app.add_middleware(
     CORSMiddleware,
@@ -373,21 +381,3 @@ def log_in(user: UserCredentials):
             cur.close()
             conn.close()
         
-    
-   
-BASE_DIR = Path(__file__).resolve().parent
-if (BASE_DIR / "portal" / "dist").exists():
-
-    DIST_DIR = BASE_DIR / "portal" / "dist"
-else:
-    DIST_DIR = BASE_DIR.parent / "portal" / "dist"
-
-app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
-
-if assets_dir.is_dir():
-    app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
-
-
-@app.get("/")
-def serve_frontend():
-    return FileResponse(DIST_DIR / "index.html")
