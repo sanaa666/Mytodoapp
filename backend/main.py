@@ -23,6 +23,7 @@ app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name = "assets"
 def serve_frontend():
     return FileResponse(DIST_DIR / "index.html")
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173",
@@ -43,6 +44,8 @@ class CreateTodo(BaseModel):
     text: str
     completed: int
 
+
+
 def get_db_connection():
     database_url = os.getenv("DATABASE_URL")
 
@@ -51,6 +54,16 @@ def get_db_connection():
     else:
         config = load_config()
         return psycopg2.connect(**config)
+
+from create_tables import create_tables
+
+@app.on_event("startup")
+def startup_event():
+    try:
+        create_tables()
+        print("tables created")
+    except Exception as e:
+        print(f"errorL {e}")
 
 
 @app.get("/todos")
