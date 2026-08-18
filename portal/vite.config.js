@@ -7,9 +7,9 @@ export default defineConfig({
   base: '/Mytodoapp/',
   server: {
     proxy: {
-      '/users': 'https://sanaa666.github.io/Mytodoapp/',
-      '/login': 'https://sanaa666.github.io/Mytodoapp/',
-      '/todos': 'https://sanaa666.github.io/Mytodoapp/',
+      '/users': 'http://127.0.0.1:8000',
+      '/login': 'http://127.0.0.1:8000',
+      '/todos': 'http://127.0.0.1:8000',
 
     },
   },
