@@ -44,7 +44,7 @@ class CreateTodo(BaseModel):
     completed: int
 
 def get_db_connection():
-    database_url = os.getenv("DATABASE_PRIVATE_URL")
+    database_url = os.getenv("DATABASE_URL")
 
     if database_url:
         return psycopg2.connect(database_url)
