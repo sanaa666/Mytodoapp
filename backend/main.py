@@ -375,7 +375,11 @@ def log_in(user: UserCredentials):
     
    
 BASE_DIR = Path(__file__).resolve().parent
-DIST_DIR = BASE_DIR.parent / "portal" / "dist"
+if (BASE_DIR / "portal" / "dist").exists():
+
+    DIST_DIR = BASE_DIR / "portal" / "dist"
+else:
+    DIST_DIR = BASE_DIR.parent / "portal" / "dist"
 
 app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
 
