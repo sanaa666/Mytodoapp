@@ -7,7 +7,6 @@ from config import load_config
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from typing import Optional
 import bcrypt
 import os
 
