@@ -1,21 +1,19 @@
 from configparser import ConfigParser
-from pathlib import Path
 
 def load_config(filename='database.ini', section='postgresql'):
     parser = ConfigParser()
-    base_dir = Path(__file__).resolve().parent
-    file_path = base_dir / filename
-    parser.read(file_path)
+    parser.read(filename)
+
     # get section, default to postgresql
-    db = {}
+    config = {}
     if parser.has_section(section):
         params = parser.items(section)
         for param in params:
-            db[param[0]] = param[1]
+            config[param[0]] = param[1]
     else:
-        raise Exception(f'Section {section} not found in the {file_path} file')
+        raise Exception('Section {0} not found in the {1} file'.format(section, filename))
 
-    return db
+    return config
 
 if __name__ == '__main__':
     config = load_config()
