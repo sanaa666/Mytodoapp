@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from typing import Optional
 import bcrypt
+import os
 
 app = FastAPI()
 
@@ -45,7 +46,13 @@ class CreateTodo(BaseModel):
 
 def get_db_connection():
     config = load_config()
-    return psycopg2.connect(**config)
+    database_url = os.getenv("https://satisfied-expression-production-4d84.up.railway.app/")
+
+    if database_url:
+        return psycopg2.connect(database_url)
+    else:
+        config = load_config()
+        return psycopg2.connect(**config)
 
 
 @app.get("/todos")
