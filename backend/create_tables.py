@@ -34,8 +34,8 @@ def create_tables():
 
 def default_user():
     sql = """
-    INSERT INTO users(user_id, user_name)
-    VALUES (1, 'default_user')
+    INSERT INTO users(user_id, user_name, password_hash)
+    VALUES (1, 'default_user', 'dummy_hash_or_actual_hashed_pass')
     ON CONFLICT (user_id) DO NOTHING;
     """
 
@@ -51,8 +51,9 @@ def default_user():
 
 def default_todo():
     sql = """
-    INSERT INTO todos(todo_id, todo_text, todo_completed)
-    VALUES(1, 'clean room', 1)
+    INSERT INTO todos(todo_id, todo_text, todo_completed, user_id)
+    VALUES(1, 'clean room', 1,1)
+    ON CONFLICT (todo_id) DO NOTHING;
     """
     try:
                 config = load_config()
