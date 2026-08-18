@@ -1,5 +1,14 @@
 import psycopg2
+import os
 from config import load_config
+
+def get_connection():
+    database_url = os.getenv("DATABASE_URL")
+    if database_url:
+        return psycopg2.connect(database_url)
+    else:
+        config = load_config()
+        return psycopg2.connect(**config)
 
 def create_tables():
     commands = (
@@ -22,13 +31,14 @@ def create_tables():
         """)
 
     try:
-        config = load_config()
-        with psycopg2.connect(**config) as conn:
+        with get_connection() as conn:
+              
             with conn.cursor() as cur:
                 for command in commands:
                     cur.execute(command)
 
-        conn.commit()
+            conn.commit()
+        print("tables created")
     except (psycopg2.DatabaseError, Exception) as error:
         print(error)
 
