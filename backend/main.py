@@ -10,6 +10,7 @@ from fastapi.responses import FileResponse
 from typing import Optional
 import bcrypt
 
+assets_dir = DIST_DIR / "assets"
 app = FastAPI()
 
 
@@ -382,6 +383,10 @@ else:
     DIST_DIR = BASE_DIR.parent / "portal" / "dist"
 
 app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
+
+if assets_dir.is_dir():
+    app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
+
 
 @app.get("/")
 def serve_frontend():
