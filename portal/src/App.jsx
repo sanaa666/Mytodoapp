@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 
 const API_BASE_URL = import.meta.env.PROD
   ? 'https://satisfied-expression-production-4d84.up.railway.app'
-  : '';
+  : 'http://localhost:8000';
 
 function ToDo() {
 
@@ -50,10 +50,21 @@ function ToDo() {
   }, []);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!username) return;
 
-    fetch(`${API_BASE_URL}/todos?user_id=${userId}`)
+    fetch(`${API_BASE_URL}/todos`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    })
       .then(res => {
+        if (res.status === 401) {
+          localStorage.removeItem("user");
+          setUsername("");
+          setUserId(null);
+          setTasks([]);
+          throw new Error("Session expired. Please log in again.");
+        }
         if (!res.ok) throw new Error("User not found");
         return res.json();
       })
@@ -66,7 +77,7 @@ function ToDo() {
         setTasks([]);
         setLoading(false);
       });
-  }, [userId]);
+  }, [username]);
 
   if (!username) {
     return (
@@ -111,6 +122,7 @@ function ToDo() {
                     headers: {
                       "Content-Type": "application/json",
                     },
+                    credentials: "include",
                     body: JSON.stringify({
                       username: cleanUsername,
                       password: cleanPassword,
@@ -130,7 +142,7 @@ function ToDo() {
                     })
                   );
                 } else {
-                  const errData = await response.json();
+                  const errData = await response.json().catch(() => ({}));
                   alert(errData.detail || "Authentication failed");
                 }
               } catch (err) {
@@ -162,11 +174,12 @@ function ToDo() {
   async function addItem() {
     if (newTask.trim() === "") return;
 
-    const response = await fetch(`${API_BASE_URL}/todos?user_id=${userId}`, {
+    const response = await fetch(`${API_BASE_URL}/todos`, {
       method: "POST",
       headers: {
         "Content-type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
         text: newTask,
         completed: 0,
@@ -193,9 +206,10 @@ function ToDo() {
   async function completeTask(id) {
 
     const response = await fetch(
-      `${API_BASE_URL}/todos?user_id=${userId}&todo_id=${id}`,
+      `${API_BASE_URL}/todos?todo_id=${id}`,
       {
         method: "PATCH",
+        credentials: "include",
       }
     );
 
@@ -209,9 +223,10 @@ function ToDo() {
 
   async function deleteTask(id) {
     await fetch(
-      `${API_BASE_URL}/todos?user_id=${userId}&todo_id=${id}`,
+      `${API_BASE_URL}/todos?todo_id=${id}`,
       {
         method: "DELETE",
+        credentials: "include",
       }
     );
     setTasks(tasks.filter(task => task.id !== id));
@@ -221,6 +236,7 @@ function ToDo() {
     await fetch(`${API_BASE_URL}/users?user_id=${targetUserId}`,
       {
         method: "DELETE",
+        credentials: "include",
       }
     );
   }
@@ -235,12 +251,13 @@ function ToDo() {
 
     const todo = tasks.find(task => task.id === id);
 
-    const response = await fetch(`${API_BASE_URL}/todos?user_id=${userId}&todo_id=${id}`, {
+    const response = await fetch(`${API_BASE_URL}/todos?todo_id=${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
 
       },
+      credentials: "include",
       body: JSON.stringify({
         text: editText,
         completed: todo.completed,
@@ -307,7 +324,16 @@ function ToDo() {
       <FilterButtons setFilter={setFilter} />
       <button
         className="logout-button"
-        onClick={() => {
+        onClick={async () => {
+          try {
+            await fetch(`${API_BASE_URL}/logout`, {
+              method: "POST",
+              credentials: "include",
+            });
+          } catch (err) {
+            console.error("logout error:", err);
+          }
+
           localStorage.removeItem("user");
           setUsername("");
           setUsernameInput("");

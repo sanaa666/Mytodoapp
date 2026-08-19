@@ -28,6 +28,14 @@ def create_tables():
             
         );
 
+        """,
+        """
+        DROP TABLE IF EXISTS sessions;
+        CREATE TABLE sessions(
+            session_token VARCHAR(255) PRIMARY KEY,
+            user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
+
+        );
         """)
 
     try:

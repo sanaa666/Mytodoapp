@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status, HTTPException
+from fastapi import FastAPI, HTTPException, Response, Cookie
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
@@ -9,6 +9,19 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import bcrypt
 import os
+import secrets
+from datetime import datetime, timedelta, timezone
+import jwt
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+from dotenv import load_dotenv
+
+SECRET_KEY = "super-secret-key-woohoo-so-secret"
+ALGORITHM = "HS256"
+
+load_dotenv()
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("Secret key env variable missing")
 
 app = FastAPI()
 
@@ -28,6 +41,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173",
                    "http://127.0.0.1:5173",
+                   "http://127.0.0.1:8000",
                    "http://localhost:8000",
                    "https://sanaa666.github.io"],
     allow_credentials=True,
@@ -67,7 +81,8 @@ def startup_event():
 
 
 @app.get("/todos")
-def get_todos(user_id: int):
+def get_todos(session_token: str = Cookie(None)):
+    user_id = get_current_user_id(session_token)
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -90,7 +105,9 @@ def get_todos(user_id: int):
     ]
 
 @app.get("/todos/")
-def get_todo(todo_id: int, user_id:int):
+def get_todo(todo_id: int, session_token: str = Cookie(None)):
+
+   user_id = get_current_user_id(session_token)
    conn = get_db_connection()
    cur = conn.cursor()
 
@@ -122,7 +139,8 @@ def get_todo(todo_id: int, user_id:int):
 
 
 @app.post("/todos")
-def create_todo(todo: CreateTodo, user_id: int):
+def create_todo(todo: CreateTodo, session_token: str = Cookie(None)):
+    user_id = get_current_user_id(session_token)
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -212,7 +230,8 @@ def create_user(user: UserCredentials):
     
 
 @app.patch("/todos")
-def complete_todo(todo_id: int, user_id: int):
+def complete_todo(todo_id: int, session_token: str = Cookie(None)):
+    user_id = get_current_user_id(session_token)
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -228,7 +247,6 @@ def complete_todo(todo_id: int, user_id: int):
     row = cur.fetchone()
     
        
-    
     if row is None:
         conn.close()
         raise HTTPException(status_code=404, detail="Todo not found")
@@ -255,7 +273,9 @@ def complete_todo(todo_id: int, user_id: int):
     }
 
 @app.put("/todos")
-def edit_todo(todo_id:int, user_id:int, todo:CreateTodo):
+def edit_todo(todo_id:int, todo:CreateTodo, session_token: str = Cookie(None)):
+    user_id = get_current_user_id(session_token)
+
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -295,7 +315,8 @@ def edit_todo(todo_id:int, user_id:int, todo:CreateTodo):
     }
         
 @app.delete("/todos")
-def delete_todo(todo_id:int, user_id: int):
+def delete_todo(todo_id:int, session_token: str = Cookie(None)):
+    user_id = get_current_user_id(session_token)
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -332,7 +353,8 @@ def delete_todo(todo_id:int, user_id: int):
     }
 
 @app.delete("/users")
-def delete_user(user_id:int):
+def delete_user(session_token: str = Cookie(None)):
+    user_id = get_current_user_id(session_token)
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -349,13 +371,15 @@ def delete_user(user_id:int):
         
  
         conn.commit()
-        return{"detail": "User" +str(user_id) +  "deleted successfully"}
+        response = Response(content={"detail": "user deleted succesfully"}, media_type="application/json")
+        response.delete_cookie("session_token")
+        return response
     finally:
         cur.close()
         conn.close()
 
 @app.post("/login")
-def log_in(user: UserCredentials):
+def log_in(user: UserCredentials, response: Response):
     username = user.username.strip()
     password = user.password.strip()
         
@@ -388,14 +412,44 @@ def log_in(user: UserCredentials):
 
             if not is_valid:
                 raise HTTPException(status_code=401, detail="invalid user or pass")
-            
-    
+
+            expiration = datetime.now(timezone.utc) + timedelta(hours=24)
+            payload ={
+                "user_id": user_id,
+                "exp": expiration
+            }
+
+            token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+            response.set_cookie(
+                key="session_token",
+                value=token,
+                httponly=True,
+                samesite="none" if os.getenv("ENVIRONMENT")=="production" else "lax",
+                secure=True if os.getenv("ENVIRONMENT") == "production" else False,
+            )
+        
             return{
                 "id": user_id,
                 "username": username
             }
-    
+
     finally:
             cur.close()
             conn.close()
-        
+
+@app.post("/logout")
+def logout(response:Response):
+        response.delete_cookie("session_token")
+        return {"detail": "logged out successfully"}
+
+def get_current_user_id(session_token: str=Cookie(None)) -> int:
+    if session_token is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        payload = jwt.decode(session_token, SECRET_KEY, algorithms =[ALGORITHM])
+        return payload["user_id"]
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
