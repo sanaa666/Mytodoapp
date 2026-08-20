@@ -6,7 +6,7 @@ import traceback
 from config import load_config
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import bcrypt
 import os
 import secrets
@@ -371,8 +371,15 @@ def delete_user(session_token: str = Cookie(None)):
         
  
         conn.commit()
-        response = Response(content={"detail": "user deleted succesfully"}, media_type="application/json")
-        response.delete_cookie("session_token")
+        response = JSONResponse(
+            content={"detail": "user deleted succesfully"})
+        
+        response.delete_cookie(
+            key="session_token",
+            samesite="none",
+            secure=True,
+            httponly=True
+        )
         return response
     finally:
         cur.close()
@@ -440,7 +447,12 @@ def log_in(user: UserCredentials, response: Response):
 
 @app.post("/logout")
 def logout(response:Response):
-        response.delete_cookie("session_token")
+        response.delete_cookie(
+            key="session_token",
+            samesite="none",
+            secure=True,
+            httponly=True
+        )
         return {"detail": "logged out successfully"}
 
 def get_current_user_id(session_token: str=Cookie(None)) -> int:
