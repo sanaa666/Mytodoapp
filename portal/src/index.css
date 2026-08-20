@@ -348,8 +348,6 @@ button {
   align-items: center;
   text-align: center;
   color: white;
-  margin-top: 10;
-  margin-left: 10;
-  margin-right: 10;
-  padding: 2;
+  padding-top: 10px;
+  padding: 2px;
 }
