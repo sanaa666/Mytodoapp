@@ -425,8 +425,8 @@ def log_in(user: UserCredentials, response: Response):
                 key="session_token",
                 value=token,
                 httponly=True,
-                samesite="none" if os.getenv("ENVIRONMENT")=="production" else "lax",
-                secure=True if os.getenv("ENVIRONMENT") == "production" else False,
+                samesite="none",
+                secure=True
             )
         
             return{
