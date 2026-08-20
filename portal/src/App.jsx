@@ -246,6 +246,23 @@ function ToDo() {
     setEditText(text);
   }
 
+  async function fetchTodos() {
+    const response = await fetch(`${API_URL}/todos`, {
+      credentials: "include",
+    });
+
+    if (response.status === 401) {
+      setUserId(null);
+      setIsLoggedIn(false);
+
+      navigate("/login");
+      return;
+    }
+
+    const data = await response.json();
+    setTodos(data);
+  }
+
   async function saveEdit(id) {
     if (editText.trim() === "") return;
 
