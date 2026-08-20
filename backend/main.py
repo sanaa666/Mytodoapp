@@ -15,7 +15,6 @@ import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from dotenv import load_dotenv
 
-SECRET_KEY = "super-secret-key-woohoo-so-secret"
 ALGORITHM = "HS256"
 
 load_dotenv()
