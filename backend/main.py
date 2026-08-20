@@ -378,7 +378,8 @@ def delete_user(session_token: str = Cookie(None)):
             key="session_token",
             samesite="none",
             secure=True,
-            httponly=True
+            httponly=True,
+            partitioned=True,
         )
         return response
     finally:
@@ -433,7 +434,8 @@ def log_in(user: UserCredentials, response: Response):
                 value=token,
                 httponly=True,
                 samesite="none",
-                secure=True
+                secure=True,
+                partitioned=True,
             )
         
             return{
@@ -451,7 +453,8 @@ def logout(response:Response):
             key="session_token",
             samesite="none",
             secure=True,
-            httponly=True
+            httponly=True,
+            partitioned=True,
         )
         return {"detail": "logged out successfully"}
 
