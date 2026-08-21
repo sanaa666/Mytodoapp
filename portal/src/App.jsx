@@ -368,7 +368,7 @@ function ToDo() {
       </button>
       <button
         className="delete-user-button"
-        onClick={() => {
+        onClick={async () => {
           await deleteUser();
           localStorage.removeItem("user");
           setUsername("");
