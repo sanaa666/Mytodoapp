@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Response, Cookie
+from fastapi import FastAPI, HTTPException, Header, Response, Cookie
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
@@ -80,8 +80,8 @@ def startup_event():
 
 
 @app.get("/todos")
-def get_todos(session_token: str = Cookie(None)):
-    user_id = get_current_user_id(session_token)
+def get_todos(session_token: str = Cookie(None), authorization:str = Header(None)):
+    user_id = get_current_user_id(session_token, authorization)
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -104,9 +104,9 @@ def get_todos(session_token: str = Cookie(None)):
     ]
 
 @app.get("/todos/")
-def get_todo(todo_id: int, session_token: str = Cookie(None)):
+def get_todo(todo_id: int, session_token: str = Cookie(None), authorization:str = Header(None)):
 
-   user_id = get_current_user_id(session_token)
+   user_id = get_current_user_id(session_token, authorization)
    conn = get_db_connection()
    cur = conn.cursor()
 
@@ -138,8 +138,8 @@ def get_todo(todo_id: int, session_token: str = Cookie(None)):
 
 
 @app.post("/todos")
-def create_todo(todo: CreateTodo, session_token: str = Cookie(None)):
-    user_id = get_current_user_id(session_token)
+def create_todo(todo: CreateTodo, session_token: str = Cookie(None), authorization:str = Header(None)):
+    user_id = get_current_user_id(session_token, authorization)
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -178,7 +178,7 @@ def create_todo(todo: CreateTodo, session_token: str = Cookie(None)):
         conn.close()
 
 @app.post("/users")
-def create_user(user: UserCredentials):
+def create_user(user: UserCredentials, response: Response):
 
     username = user.username.strip()
     password = user.password.strip()
@@ -215,9 +215,22 @@ def create_user(user: UserCredentials):
         user_id = cur.fetchone()[0]
         conn.commit()
 
+        expiration = datetime.now(timezone.utc) + timedelta(hours=24)
+        payload = {"user_id": user_id, "exp": expiration}
+        token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+        response.set_cookie(
+            key="session_token",
+            value=token,
+            httponly=True,
+            samesite="none",
+            secure=True
+        )
+
         return{
             "id": user_id,
-            "username": username
+            "username": username,
+            "token": token
         }
 
     except Exception as e:
@@ -229,8 +242,8 @@ def create_user(user: UserCredentials):
     
 
 @app.patch("/todos")
-def complete_todo(todo_id: int, session_token: str = Cookie(None)):
-    user_id = get_current_user_id(session_token)
+def complete_todo(todo_id: int, session_token: str = Cookie(None), authorization:str = Header(None)):
+    user_id = get_current_user_id(session_token, authorization)
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -272,8 +285,8 @@ def complete_todo(todo_id: int, session_token: str = Cookie(None)):
     }
 
 @app.put("/todos")
-def edit_todo(todo_id:int, todo:CreateTodo, session_token: str = Cookie(None)):
-    user_id = get_current_user_id(session_token)
+def edit_todo(todo_id:int, todo:CreateTodo, session_token: str = Cookie(None), authorization:str = Header(None)):
+    user_id = get_current_user_id(session_token, authorization)
 
     conn = get_db_connection()
     cur = conn.cursor()
@@ -314,8 +327,8 @@ def edit_todo(todo_id:int, todo:CreateTodo, session_token: str = Cookie(None)):
     }
         
 @app.delete("/todos")
-def delete_todo(todo_id:int, session_token: str = Cookie(None)):
-    user_id = get_current_user_id(session_token)
+def delete_todo(todo_id:int, session_token: str = Cookie(None), authorization:str = Header(None)):
+    user_id = get_current_user_id(session_token, authorization)
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -352,12 +365,15 @@ def delete_todo(todo_id:int, session_token: str = Cookie(None)):
     }
 
 @app.delete("/users")
-def delete_user(session_token: str = Cookie(None)):
-    user_id = get_current_user_id(session_token)
+def delete_user(session_token: str = Cookie(None), authorization:str = Header(None)):
+    user_id = get_current_user_id(session_token, authorization)
     conn = get_db_connection()
     cur = conn.cursor()
 
     try:
+
+        cur.execute("DELETE FROM todos WHERE user_id = %s;",
+            (user_id,))
 
         cur.execute(
             "DELETE FROM users WHERE user_id = %s RETURNING user_id;",
@@ -437,7 +453,8 @@ def log_in(user: UserCredentials, response: Response):
         
             return{
                 "id": user_id,
-                "username": username
+                "username": username,
+                "token": token
             }
 
     finally:
@@ -454,13 +471,14 @@ def logout(response:Response):
         )
         return {"detail": "logged out successfully"}
 
-def get_current_user_id(session_token: str=Cookie(None)) -> int:
-    if session_token is None:
+def get_current_user_id(session_token: str=Cookie(None), authorization: str = Header(None)) -> int:
+    token = session_token or (authorization.split(" ")[-1] if authorization else None)
+
+
+    if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
     try:
-        payload = jwt.decode(session_token, SECRET_KEY, algorithms =[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload["user_id"]
-    except ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired")
-    except InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")

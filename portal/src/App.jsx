@@ -11,6 +11,15 @@ const API_BASE_URL = import.meta.env.PROD
   ? 'https://satisfied-expression-production-4d84.up.railway.app'
   : 'http://localhost:8000';
 
+
+function getAuthHeaders(extraHeaders = {}) {
+  const savedUser = localStorage.getItem("user");
+  const token = savedUser ? JSON.parse(savedUser).token : null;
+  return {
+    ...extraHeaders,
+    ...(token ? { "Authorization": `Bearer ${token}` } : {})
+  };
+}
 function ToDo() {
 
   const [username, setUsername] = useState("");
@@ -31,11 +40,6 @@ function ToDo() {
     setUsernameInput(value)
   }
 
-  const onDoubleClickHandler = () => {
-    setEditingId(null);
-    setEditText("");
-  }
-
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (!savedUser) {
@@ -54,7 +58,7 @@ function ToDo() {
 
     fetch(`${API_BASE_URL}/todos`, {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: getAuthHeaders({ "Content-Type": "application/json" }),
       credentials: "include",
     })
       .then(res => {
@@ -119,9 +123,9 @@ function ToDo() {
                 const response = await fetch(endpoint,
                   {
                     method: "POST",
-                    headers: {
+                    headers: getAuthHeaders({
                       "Content-Type": "application/json",
-                    },
+                    }),
                     credentials: "include",
                     body: JSON.stringify({
                       username: cleanUsername,
@@ -138,7 +142,8 @@ function ToDo() {
                     "user",
                     JSON.stringify({
                       username: user.username,
-                      userId: user.id
+                      userId: user.id,
+                      token: user.token
                     })
                   );
                 } else {
@@ -160,7 +165,7 @@ function ToDo() {
         >
           {isSignUp ? "Already have an account? Log in" : "Need an account? Sign up"}
         </p>
-      </div>
+      </div >
     );
   }
 
@@ -176,16 +181,15 @@ function ToDo() {
 
     const response = await fetch(`${API_BASE_URL}/todos`, {
       method: "POST",
-      headers: {
+      headers: getAuthHeaders({
         "Content-type": "application/json",
-      },
+      }),
       credentials: "include",
       body: JSON.stringify({
         text: newTask,
         completed: 0,
       }),
-    }
-    );
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -195,9 +199,6 @@ function ToDo() {
 
 
     const data = await response.json();
-
-
-
     setTasks(t => [...t, data]);
     setNewTask("");
 
@@ -209,6 +210,7 @@ function ToDo() {
       `${API_BASE_URL}/todos?todo_id=${id}`,
       {
         method: "PATCH",
+        headers: getAuthHeaders(),
         credentials: "include",
       }
     );
@@ -226,16 +228,18 @@ function ToDo() {
       `${API_BASE_URL}/todos?todo_id=${id}`,
       {
         method: "DELETE",
+        headers: getAuthHeaders(),
         credentials: "include",
       }
     );
     setTasks(tasks.filter(task => task.id !== id));
   }
 
-  async function deleteUser(targetUserId) {
-    await fetch(`${API_BASE_URL}/users?user_id=${targetUserId}`,
+  async function deleteUser() {
+    await fetch(`${API_BASE_URL}/users`,
       {
         method: "DELETE",
+        headers: getAuthHeaders(),
         credentials: "include",
       }
     );
@@ -246,22 +250,22 @@ function ToDo() {
     setEditText(text);
   }
 
-  async function fetchTodos() {
-    const response = await fetch(`${API_URL}/todos`, {
-      credentials: "include",
-    });
+  // async function fetchTodos() {
+  //   const response = await fetch(`${API_URL}/todos`, {
+  //     credentials: "include",
+  //   });
 
-    if (response.status === 401) {
-      setUserId(null);
-      setIsLoggedIn(false);
+  //   if (response.status === 401) {
+  //     setUserId(null);
+  //     setIsLoggedIn(false);
 
-      navigate("/login");
-      return;
-    }
+  //     navigate("/login");
+  //     return;
+  //   }
 
-    const data = await response.json();
-    setTodos(data);
-  }
+  //   const data = await response.json();
+  //   setTodos(data);
+  // }
 
   async function saveEdit(id) {
     if (editText.trim() === "") return;
@@ -270,10 +274,10 @@ function ToDo() {
 
     const response = await fetch(`${API_BASE_URL}/todos?todo_id=${id}`, {
       method: "PUT",
-      headers: {
+      headers: getAuthHeaders({
         "Content-Type": "application/json",
 
-      },
+      }),
       credentials: "include",
       body: JSON.stringify({
         text: editText,
@@ -345,6 +349,7 @@ function ToDo() {
           try {
             await fetch(`${API_BASE_URL}/logout`, {
               method: "POST",
+              headers: getAuthHeaders(),
               credentials: "include",
             });
           } catch (err) {
@@ -364,7 +369,7 @@ function ToDo() {
       <button
         className="delete-user-button"
         onClick={() => {
-          deleteUser(userId);
+          await deleteUser();
           localStorage.removeItem("user");
           setUsername("");
           setUsernameInput("");
